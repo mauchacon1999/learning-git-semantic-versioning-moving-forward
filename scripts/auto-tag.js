@@ -157,31 +157,31 @@ function getFeatureNumberForRelease(branchName) {
     const match = branchName.match(/feature\/(.+)/);
     if (match) {
         const featureName = match[1];
-        
+
         // Obtener todos los tags existentes
         try {
             const existingTags = execSync('git tag --list "v*"', { encoding: 'utf8' })
                 .trim()
                 .split('\n')
                 .filter(tag => tag.length > 0);
-            
+
             // Obtener la versión base del último tag
             const latestTag = getLatestTag();
             if (latestTag) {
                 const baseVersion = extractBaseVersion(latestTag);
-                
+
                 // Buscar tags alpha que correspondan al release actual
-                const alphaTags = existingTags.filter(tag => 
-                    tag.includes('-alpha.') && 
+                const alphaTags = existingTags.filter(tag =>
+                    tag.includes('-alpha.') &&
                     tag.startsWith(`v${baseVersion}`)
                 );
-                
+
                 // Si ya hay tags alpha, usar el siguiente número
                 if (alphaTags.length > 0) {
                     return alphaTags.length + 1;
                 }
             }
-            
+
             // Si no hay tags alpha para este release, empezar con 1
             return 1;
         } catch (error) {
@@ -247,49 +247,38 @@ function hasTagForCurrentBranch(branchName) {
             .trim()
             .split('\n')
             .filter(tag => tag.length > 0);
-        
+
         // Para features, verificar si ya existe un tag para esta feature específica
         if (branchName.startsWith('feature/')) {
             // Obtener la versión base del último tag
             const latestTag = getLatestTag();
             if (latestTag) {
                 const baseVersion = extractBaseVersion(latestTag);
-                
+
                 // Buscar tags alpha que correspondan al release actual
-                const alphaTags = allTags.filter(tag => 
-                    tag.includes('-alpha.') && 
+                const alphaTags = allTags.filter(tag =>
+                    tag.includes('-alpha.') &&
                     tag.startsWith(`v${baseVersion}`)
                 );
-                
+
                 // Si ya hay tags alpha para este release, verificar si alguno corresponde a esta feature
                 if (alphaTags.length > 0) {
-                    // Obtener el número de feature actual
-                    const currentFeatureNumber = getFeatureNumberForRelease(branchName);
-                    
-                    // Verificar si ya existe un tag con este número de feature
-                    const existingTagForFeature = alphaTags.find(tag => {
-                        const match = tag.match(new RegExp(`-alpha\\.${currentFeatureNumber}\\.`));
-                        return match !== null;
-                    });
-                    
-                    if (existingTagForFeature) {
-                        console.log(`⚠️  Ya existe un tag para esta feature: ${existingTagForFeature}`);
-                        return true;
-                    }
-                    
-                    // Si no existe tag para esta feature específica, permitir crear uno nuevo
-                    return false;
+                    // Para features, si ya existe cualquier tag alpha para este release,
+                    // asumir que ya hay un tag para esta rama (evitar múltiples tags por rama)
+                    console.log(`⚠️  Ya existen tags para el release ${baseVersion}: ${alphaTags.join(', ')}`);
+                    console.log(`💡 La rama ${branchName} ya tiene un tag asociado`);
+                    return true;
                 }
             }
         }
-        
+
         // Para otras ramas, verificar si hay tags que apunten al commit actual
         const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
         const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
             .trim()
             .split('\n')
             .filter(tag => tag.length > 0);
-        
+
         return tagsForCommit.length > 0;
     } catch (error) {
         return false;
@@ -325,14 +314,14 @@ function autoTag() {
         // Generar nueva versión
         const nextVersion = generateNextVersion(baseVersion, strategy, currentBranch);
         const suffix = generateSuffix(strategy, currentBranch);
-        
+
         // Verificar si ya existe un tag para esta rama
         if (suffix === null) {
             console.log('✅ Ya existe un tag para esta rama');
             console.log('💡 No se necesita crear un nuevo tag');
             return;
         }
-        
+
         const newTag = `${strategy.prefix}${nextVersion}${suffix}`;
 
         console.log(`🎯 Nueva versión sugerida: ${newTag}`);
