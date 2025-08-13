@@ -21,7 +21,7 @@ const BRANCH_HOOKS = {
   'development': {
     'pre-commit': 'pnpm run verify-tags',
     'pre-push': 'pnpm run auto-tag',
-    'post-merge': 'echo "Merge completado en develop"'
+    'post-merge': 'echo "Merge completado en development"'
   },
   'feature': {
     'pre-commit': 'pnpm run verify-tags',
