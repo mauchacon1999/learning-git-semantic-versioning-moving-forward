@@ -37,6 +37,48 @@ pnpm run create-tag
 pnpm run create-tag v1.0.0
 ```
 
+### 4. Auto-tagging por Rama
+```bash
+pnpm run auto-tag
+```
+Crea automáticamente tags basados en la rama actual y la estrategia de versionado.
+
+### 5. Configurar Hooks por Rama
+```bash
+# Configurar hooks para la rama actual
+pnpm run setup-branch-hooks
+
+# Ver estrategias disponibles
+pnpm run setup-branch-hooks --show
+```
+
+### 6. Gestor GitFlow
+```bash
+# Ver comandos disponibles
+pnpm run gitflow
+
+# Crear feature
+pnpm run gitflow feature nueva-funcionalidad
+
+# Finalizar feature
+pnpm run gitflow finish-feature
+
+# Crear release
+pnpm run gitflow release 1.0.0
+
+# Finalizar release
+pnpm run gitflow finish-release
+
+# Crear hotfix
+pnpm run gitflow hotfix 1.0.1
+
+# Finalizar hotfix
+pnpm run gitflow finish-hotfix
+
+# Ver estado
+pnpm run gitflow status
+```
+
 ## 🏷️ Formatos de Tags Válidos
 
 - `v1.0.0` - Versión estable
@@ -44,6 +86,33 @@ pnpm run create-tag v1.0.0
 - `v1.0.0-alpha` - Versión pre-release
 - `v1.0.0-beta.1` - Versión pre-release con número
 - `v1.0.0+20231201` - Versión con build metadata
+
+## 🌿 Estrategias por Rama
+
+### Rama `main` / `master`
+- **Tipo**: Versiones estables de producción
+- **Formato**: `v1.0.0`
+- **Hooks**: Verificación estricta de tags antes de push
+
+### Rama `develop`
+- **Tipo**: Versiones beta para desarrollo
+- **Formato**: `v1.0.0-beta.20231201`
+- **Hooks**: Auto-tagging en push
+
+### Ramas `feature/*`
+- **Tipo**: Versiones alpha para features
+- **Formato**: `v1.0.0-alpha.20231201`
+- **Hooks**: Auto-tagging en push
+
+### Ramas `hotfix/*`
+- **Tipo**: Versiones de parche para correcciones urgentes
+- **Formato**: `v1.0.1`
+- **Hooks**: Auto-tagging en push
+
+### Ramas `release/*`
+- **Tipo**: Versiones release candidate
+- **Formato**: `v1.0.0-rc.20231201`
+- **Hooks**: Auto-tagging en push
 
 ## 🔧 Hooks de Git (Husky)
 
