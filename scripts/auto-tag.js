@@ -98,8 +98,9 @@ function generateNextVersion(currentVersion, strategy, branchName) {
 
         case 'pre-release':
             if (branchName.startsWith('feature/')) {
-                // Para features, incrementar minor version (nuevo release)
-                return `${major}.${minor + 1}.${patch}`;
+                // Para features, mantener la misma versión minor (mismo release)
+                // Solo cambiar el número de feature en el sufijo
+                return `${major}.${minor}.${patch}`;
             }
             // Para development y release, mantener la versión actual
             return `${major}.${minor}.${patch}`;
@@ -217,6 +218,62 @@ function detectStrategy(branchName) {
         suffix: '-dev',
         description: 'Versión de desarrollo'
     };
+}
+
+/**
+ * Verifica si ya existe un tag para la rama actual
+ */
+function hasTagForCurrentBranch(branchName) {
+    try {
+        // Obtener todos los tags que contengan el patrón de la rama actual
+        const allTags = execSync('git tag --list "v*"', { encoding: 'utf8' })
+            .trim()
+            .split('\n')
+            .filter(tag => tag.length > 0);
+
+        // Para features, buscar tags alpha que correspondan a esta rama
+        if (branchName.startsWith('feature/')) {
+            // Extraer el nombre de la feature
+            const featureMatch = branchName.match(/feature\/(.+)/);
+            if (featureMatch) {
+                const featureName = featureMatch[1];
+
+                // Buscar tags alpha que puedan corresponder a esta feature
+                const alphaTags = allTags.filter(tag =>
+                    tag.includes('-alpha.') &&
+                    tag.includes('.2025') // Timestamp del año actual
+                );
+
+                // Si ya hay tags alpha para este release, verificar si alguno corresponde a esta feature
+                if (alphaTags.length > 0) {
+                    // Obtener la versión base actual
+                    const baseVersion = extractBaseVersion(getLatestTag());
+
+                    // Buscar tags que correspondan al release actual
+                    const releaseTags = alphaTags.filter(tag =>
+                        tag.startsWith(`v${baseVersion}`)
+                    );
+
+                    // Si hay tags para este release, asumir que ya existe uno para esta feature
+                    if (releaseTags.length > 0) {
+                        console.log(`⚠️  Ya existen tags para el release ${baseVersion}: ${releaseTags.join(', ')}`);
+                        return true;
+                    }
+                }
+            }
+        }
+
+        // Para otras ramas, verificar si hay tags que apunten al commit actual
+        const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+        const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
+            .trim()
+            .split('\n')
+            .filter(tag => tag.length > 0);
+
+        return tagsForCommit.length > 0;
+    } catch (error) {
+        return false;
+    }
 }
 
 /**
