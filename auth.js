@@ -4,7 +4,7 @@
  * Features:
  * - feature/user-authentication
  * - feature/enhance-auth-info
- * Hotfixes:
+ * Hotfixes:wedw
  * - qa-fix-auth-validation
  * - qa-fix-security-validation
  * - qa-fix-auth-stats
