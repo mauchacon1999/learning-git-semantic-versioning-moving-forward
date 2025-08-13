@@ -8,6 +8,7 @@
  * - qa-fix-auth-validation
  * - qa-fix-security-validation
  * - qa-fix-auth-stats
+ * Mauricio.
  */
 class UserAuth {
     constructor() {
