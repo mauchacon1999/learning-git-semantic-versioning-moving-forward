@@ -7,6 +7,7 @@
  * Hotfixes:
  * - qa-fix-auth-validation
  * - qa-fix-security-validation
+ * - qa-fix-auth-stats
  */
 class UserAuth {
     constructor() {
@@ -86,8 +87,23 @@ class UserAuth {
             requireSpecialChars: true,
             requireNumbers: true,
             requireUppercase: true,
-            requireLowercase: true
+            requireLowercase: true,
+            // Nuevas configuraciones de seguridad
+            maxSessionsPerUser: 3,
+            requireStrongPassword: true,
+            passwordExpiryDays: 90,
+            enableAuditLog: true,
+            blockCommonPasswords: true,
+            rateLimitAttempts: 10,
+            rateLimitWindow: 5 * 60 * 1000 // 5 minutos
         };
+
+        // Lista de contraseñas comunes bloqueadas
+        this.blockedPasswords = new Set([
+            'password', '123456', '123456789', 'qwerty', 'abc123',
+            'password123', 'admin', 'letmein', 'welcome', 'monkey',
+            'dragon', 'master', 'football', 'superman', 'trustno1'
+        ]);
     }
 
     register(username, email, password, role = 'user') {
@@ -139,6 +155,9 @@ class UserAuth {
     }
 
     login(username, password) {
+        // Limpiar sesiones expiradas antes del login
+        this.cleanupExpiredSessions();
+        
         // Verificar si la cuenta está bloqueada
         if (this.isAccountLocked(username)) {
             this.logSecurityEvent('login_blocked', { username, reason: 'account_locked' });
@@ -146,22 +165,28 @@ class UserAuth {
         }
 
         const user = this.getUserByUsername(username);
-
+        
         if (!user) {
             this.recordFailedAttempt(username);
             this.logSecurityEvent('login_failed', { username, reason: 'user_not_found' });
             throw new Error('Usuario no encontrado');
         }
-
+        
         if (!user.isActive) {
             this.logSecurityEvent('login_failed', { username, reason: 'account_inactive' });
             throw new Error('Usuario inactivo');
         }
-
+        
         if (user.password !== password) {
             this.recordFailedAttempt(username);
             this.logSecurityEvent('login_failed', { username, reason: 'invalid_password' });
             throw new Error('Contraseña incorrecta');
+        }
+
+        // Verificar límite de sesiones
+        if (this.checkSessionLimit(user.id)) {
+            this.logSecurityEvent('login_blocked', { username, reason: 'session_limit_reached' });
+            throw new Error('Límite de sesiones alcanzado. Cierre sesiones en otros dispositivos.');
         }
 
         // Resetear intentos fallidos
@@ -182,7 +207,7 @@ class UserAuth {
         };
 
         this.sessions.set(sessionId, session);
-
+        
         // Actualizar último login
         user.lastLogin = new Date();
         this.users.set(user.id, user);
@@ -322,9 +347,57 @@ class UserAuth {
             return false;
         }
 
+        // Verificar longitud mínima
+        if (password.length < this.securityConfig.minPasswordLength) {
+            return false;
+        }
+
+        // Verificar si es una contraseña común bloqueada
+        if (this.securityConfig.blockCommonPasswords && this.blockedPasswords.has(password.toLowerCase())) {
+            return false;
+        }
+
         // Validación de contraseña mejorada con caracteres especiales
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         return passwordRegex.test(password);
+    }
+
+    // Nuevo método para validar contraseñas comunes
+    isCommonPassword(password) {
+        return this.blockedPasswords.has(password.toLowerCase());
+    }
+
+    // Nuevo método para verificar límite de sesiones
+    checkSessionLimit(userId) {
+        const userSessions = Array.from(this.sessions.values()).filter(session =>
+            session.userId === userId && new Date() <= session.expiresAt
+        );
+
+        return userSessions.length >= this.securityConfig.maxSessionsPerUser;
+    }
+
+    // Nuevo método para limpiar sesiones expiradas
+    cleanupExpiredSessions() {
+        const now = new Date();
+        let cleanedCount = 0;
+
+        for (const [sessionId, session] of this.sessions.entries()) {
+            if (now > session.expiresAt) {
+                this.sessions.delete(sessionId);
+                this.logSecurityEvent('session_cleaned', {
+                    username: session.username,
+                    sessionId,
+                    reason: 'expired'
+                });
+                cleanedCount++;
+            }
+        }
+
+        if (cleanedCount > 0) {
+            console.log(`🧹 Limpiadas ${cleanedCount} sesiones expiradas`);
+        }
+
+        return cleanedCount;
     }
 
     // Métodos adicionales para gestión de usuarios
