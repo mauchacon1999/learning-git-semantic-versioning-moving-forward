@@ -18,7 +18,7 @@ const BRANCH_HOOKS = {
     'pre-push': 'pnpm run verify-tags && pnpm run auto-tag',
     'post-merge': 'echo "Merge completado en master - verificar tags"'
   },
-  'develop': {
+  'development': {
     'pre-commit': 'pnpm run verify-tags',
     'pre-push': 'pnpm run auto-tag',
     'post-merge': 'echo "Merge completado en develop"'
@@ -54,23 +54,23 @@ function detectBranchType(branchName) {
   if (branchName === 'main' || branchName === 'master') {
     return 'main';
   }
-  
+
   if (branchName === 'develop') {
     return 'develop';
   }
-  
+
   if (branchName.startsWith('feature/')) {
     return 'feature';
   }
-  
+
   if (branchName.startsWith('hotfix/')) {
     return 'hotfix';
   }
-  
+
   if (branchName.startsWith('release/')) {
     return 'staging';
   }
-  
+
   return 'feature'; // Por defecto
 }
 
@@ -101,7 +101,7 @@ ${command}
 function setupBranchHooks() {
   try {
     console.log('🔧 Configurando hooks por rama...\n');
-    
+
     // Verificar si estamos en un repositorio Git
     try {
       execSync('git rev-parse --git-dir', { stdio: 'pipe' });
@@ -109,29 +109,29 @@ function setupBranchHooks() {
       console.error('❌ Error: No se encontró un repositorio Git válido');
       process.exit(1);
     }
-    
+
     // Obtener información de la rama
     const currentBranch = getCurrentBranch();
     const branchType = detectBranchType(currentBranch);
     const hooks = BRANCH_HOOKS[branchType] || BRANCH_HOOKS['feature'];
-    
+
     console.log(`🌿 Rama actual: ${currentBranch}`);
     console.log(`📋 Tipo de rama: ${branchType}`);
     console.log(`🔧 Hooks a configurar: ${Object.keys(hooks).join(', ')}\n`);
-    
+
     // Crear hooks
     Object.entries(hooks).forEach(([hookName, command]) => {
       createHook(hookName, command);
     });
-    
+
     console.log('\n🎉 Configuración completada!');
     console.log('\n📋 Hooks configurados:');
     Object.entries(hooks).forEach(([hookName, command]) => {
       console.log(`   - ${hookName}: ${command}`);
     });
-    
+
     console.log('\n💡 Los hooks se ejecutarán automáticamente en las operaciones de Git');
-    
+
   } catch (error) {
     console.error('❌ Error:', error.message);
     process.exit(1);
@@ -143,7 +143,7 @@ function setupBranchHooks() {
  */
 function showBranchStrategies() {
   console.log('📋 Estrategias de ramas disponibles:\n');
-  
+
   Object.entries(BRANCH_HOOKS).forEach(([branchType, hooks]) => {
     console.log(`🌿 ${branchType.toUpperCase()}:`);
     Object.entries(hooks).forEach(([hookName, command]) => {
