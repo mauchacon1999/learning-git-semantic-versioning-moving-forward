@@ -103,7 +103,11 @@ function generateNextVersion(currentVersion, strategy, branchName) {
                 // Solo cambiar el número de feature en el sufijo
                 return `${major}.${minor}.${patch}`;
             }
-            // Para development y release, mantener la versión actual
+            // Para development, incrementar versión minor después de merge de features
+            if (branchName === 'development') {
+                return `${major}.${minor + 1}.0`;
+            }
+            // Para release, mantener la versión actual
             return `${major}.${minor}.${patch}`;
 
         case 'patch':
