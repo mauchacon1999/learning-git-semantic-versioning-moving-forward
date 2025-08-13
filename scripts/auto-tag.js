@@ -140,6 +140,20 @@ function generateSuffix(strategy, branchName) {
 
     // Para release, agregar número de hotfix si es necesario
     if (branchName.startsWith('release/')) {
+        // Verificar si el commit actual ya tiene un tag RC
+        const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+        const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
+            .trim()
+            .split('\n')
+            .filter(tag => tag.length > 0);
+        
+        // Si ya hay un tag RC para este commit, no crear otro
+        const hasRCTag = tagsForCommit.some(tag => tag.includes('-rc.'));
+        if (hasRCTag) {
+            return null; // Indicar que no se debe crear un nuevo tag
+        }
+        
+        // Si no hay tag RC, crear uno nuevo
         const hotfixNumber = getHotfixNumber(branchName);
         if (hotfixNumber > 0) {
             return `-rc.${hotfixNumber}.${timestamp}`;
@@ -306,6 +320,26 @@ function hasTagForCurrentBranch(branchName) {
             }
             
             // Si no hay tags para este commit, permitir crear un nuevo hotfix
+            return false;
+        }
+
+        // Para release, verificar si ya existe un tag RC para este commit
+        if (branchName.startsWith('release/')) {
+            const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+            const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
+                .trim()
+                .split('\n')
+                .filter(tag => tag.length > 0);
+            
+            // Solo bloquear si ya hay un tag RC para este commit
+            const hasRCTag = tagsForCommit.some(tag => tag.includes('-rc.'));
+            if (hasRCTag) {
+                console.log(`⚠️  El commit actual ya tiene un tag RC: ${tagsForCommit.find(tag => tag.includes('-rc.'))}`);
+                console.log(`💡 La rama ${branchName} ya tiene un tag RC asociado`);
+                return true;
+            }
+            
+            // Si no hay tag RC, permitir crear uno nuevo
             return false;
         }
 
