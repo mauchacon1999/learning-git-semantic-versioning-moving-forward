@@ -232,7 +232,7 @@ function hasTagForCurrentBranch(branchName) {
 
         // Para features, fixes y skins, verificar si ya existe un tag para esta rama específica
         if (branchName.startsWith('feature/') || branchName.startsWith('fix/') || branchName.startsWith('skin/')) {
-            // Obtener la versión base del último tag
+            // Obtener la versión base del último tag 11
             const latestTag = getLatestTag();
             if (latestTag) {
                 const baseVersion = extractBaseVersion(latestTag);
