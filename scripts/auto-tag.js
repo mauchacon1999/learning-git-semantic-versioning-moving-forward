@@ -23,17 +23,17 @@ const BRANCH_STRATEGIES = {
         suffix: '-beta',
         description: 'Versiones beta para desarrollo'
     },
-    'staging': {
-        type: 'pre-release',
-        prefix: 'v',
-        suffix: '-rc',
-        description: 'Versiones release candidate'
-    },
     'feature': {
         type: 'pre-release',
         prefix: 'v',
         suffix: '-alpha',
         description: 'Versiones alpha para features'
+    },
+    'release': {
+        type: 'pre-release',
+        prefix: 'v',
+        suffix: '-rc',
+        description: 'Versiones release candidate para QA'
     },
     'hotfix': {
         type: 'patch',
@@ -97,10 +97,12 @@ function generateNextVersion(currentVersion, strategy, branchName) {
             return `${major}.${minor}.${patch + 1}`;
 
         case 'pre-release':
+            // Para features, incrementar minor version
             if (branchName.startsWith('feature/')) {
                 return `${major}.${minor + 1}.${patch}`;
             }
-            return `${major}.${minor}.${patch + 1}`;
+            // Para development y release, mantener la versión actual
+            return `${major}.${minor}.${patch}`;
 
         case 'patch':
             return `${major}.${minor}.${patch + 1}`;
@@ -117,17 +119,64 @@ function generateSuffix(strategy, branchName) {
     if (!strategy.suffix) return '';
 
     const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const branchSuffix = branchName.replace(/[^a-zA-Z0-9]/g, '-');
 
-    switch (strategy.suffix) {
-        case '-alpha':
-            return `-alpha.${timestamp}`;
-        case '-beta':
-            return `-beta.${timestamp}`;
-        case '-rc':
-            return `-rc.${timestamp}`;
-        default:
-            return strategy.suffix;
+    // Para features, agregar número secuencial
+    if (branchName.startsWith('feature/')) {
+        const featureNumber = getFeatureNumber(branchName);
+        return `-alpha.${featureNumber}.${timestamp}`;
+    }
+
+    // Para release, agregar número de hotfix si es necesario
+    if (branchName.startsWith('release/')) {
+        const hotfixNumber = getHotfixNumber(branchName);
+        if (hotfixNumber > 0) {
+            return `-rc.${hotfixNumber}.${timestamp}`;
+        }
+        return `-rc.${timestamp}`;
+    }
+
+    // Para development
+    if (branchName === 'development') {
+        return `-beta.${timestamp}`;
+    }
+
+    return strategy.suffix;
+}
+
+/**
+ * Obtiene el número de feature basado en el nombre
+ */
+function getFeatureNumber(branchName) {
+    // Extraer número del nombre de la feature
+    const match = branchName.match(/feature\/(.+)/);
+    if (match) {
+        const featureName = match[1];
+        // Contar features existentes para obtener número secuencial
+        try {
+            const features = execSync('git branch --list "feature/*"', { encoding: 'utf8' })
+                .trim()
+                .split('\n')
+                .filter(branch => branch.trim().length > 0);
+            return features.length;
+        } catch (error) {
+            return 1;
+        }
+    }
+    return 1;
+}
+
+/**
+ * Obtiene el número de hotfix para release
+ */
+function getHotfixNumber(branchName) {
+    try {
+        const hotfixes = execSync('git branch --list "hotfix/*"', { encoding: 'utf8' })
+            .trim()
+            .split('\n')
+            .filter(branch => branch.trim().length > 0);
+        return hotfixes.length;
+    } catch (error) {
+        return 0;
     }
 }
 
@@ -150,7 +199,7 @@ function detectStrategy(branchName) {
     }
 
     if (branchName.startsWith('release/')) {
-        return BRANCH_STRATEGIES['staging'];
+        return BRANCH_STRATEGIES['release'];
     }
 
     // Estrategia por defecto para ramas desconocidas

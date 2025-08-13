@@ -23,11 +23,10 @@ pnpm install
 
 ## 🌿 Flujo de Trabajo con Bitbucket
 
-### **1. Desarrollo de Features por Módulo**
+### **1. Desarrollo de Features**
 
 ```bash
-# Módulo Depósito (v1.8)
-# Crear primera feature del módulo
+# Crear feature desde development
 pnpm run gitflow feature add-estilos-deposito
 # → Crea: feature/add-estilos-deposito
 # → Auto-tag: v1.8.0-alpha.1.20231201
@@ -36,57 +35,46 @@ pnpm run gitflow feature add-estilos-deposito
 git add .
 git commit -m "feat: agregar estilos de depósito"
 
-# Trabajar en la feature
-git add .
-git commit -m "feat: agregar estilos de depósito"
-
-# Crear segunda feature del mismo módulo
+# Crear otra feature cuando sea necesario
 pnpm run gitflow feature add-submit-deposit
 # → Crea: feature/add-submit-deposit
-# → Auto-tag: v1.8.0-alpha.2.20231201
+# → Auto-tag: v1.9.0-alpha.2.20231201
 
-# Trabajar en la segunda feature
+# Trabajar en la feature
 git add .
 git commit -m "feat: agregar funcionalidad de submit"
 
-# NOTA: Los features se terminan cuando creas el release desde development
-# Ejemplo: Development v1.7.0-beta → Release v1.8 → Development v1.8.0-beta
+# NOTA: Cuando las features estén listas para QA, creas un release desde development
 ```
 
-#### **Ejemplo: Desarrollo de Múltiples Módulos**
+#### **Ejemplo: Desarrollo de Features**
 
 ```bash
-# Módulo Depósito (v1.8) - En desarrollo
+# Feature 1 - Estilos de depósito
 pnpm run gitflow feature add-estilos-deposito
 # → feature/add-estilos-deposito (v1.8.0-alpha.1.20231201)
 
+# Feature 2 - Funcionalidad de submit
 pnpm run gitflow feature add-submit-deposit
-# → feature/add-submit-deposit (v1.8.0-alpha.2.20231201)
+# → feature/add-submit-deposit (v1.9.0-alpha.2.20231201)
 
-# Módulo Retiros (v1.9) - Nuevo módulo, nueva versión
+# Feature 3 - Funcionalidad de retiros
 pnpm run gitflow feature add-retiros
-# → feature/add-retiros (v1.9.0-alpha.1.20231201)
+# → feature/add-retiros (v1.10.0-alpha.3.20231201)
 
-# Trabajar en paralelo en diferentes módulos
-# - Módulo Depósito: Estilos + Submit (v1.8)
-# - Módulo Retiros: Funcionalidad de retiros (v1.9)
-
-# Trabajar en las features
-# - feature/add-estilos-deposito: Estilos del módulo depósito
+# Trabajar en las features según prioridad
+# - feature/add-estilos-deposito: Estilos de depósito
 # - feature/add-submit-deposit: Funcionalidad de submit
 # - feature/add-retiros: Funcionalidad de retiros
 
-# NOTA: Los features se terminan cuando creas el release desde development
+# NOTA: Cuando las features estén listas para QA, creas un release desde development
 # Development v1.7.0-beta → Release v1.8 → Development v1.8.0-beta
-
-# Development acumula features de ambos módulos
-# → development: v1.9.0-beta.20231201 (última versión)
 ```
 
-### **2. Módulo Completo → Release para QA**
+### **2. Features Listas → Release para QA**
 
 ```bash
-# Cuando el módulo está completo (todas las features en development)
+# Cuando las features están listas para QA
 # Bitbucket crea release/1.8 automáticamente desde development
 # Tú haces checkout manual:
 git checkout release/1.8
@@ -95,7 +83,7 @@ pnpm run gitflow checkout-release 1.8
 # → Auto-tag: v1.8.0-rc.20231201
 # → [DESPLIEGUE A AMBIENTE QA]
 
-# Ejemplo: Módulo Depósito completo
+# Ejemplo: Features listas para QA
 # - Development v1.7.0-beta (versión anterior)
 # - feature/add-estilos-deposito ✅ (en development)
 # - feature/add-submit-deposit ✅ (en development)
@@ -163,22 +151,22 @@ pnpm run gitflow finish-hotfix
 - **`release/*`**: `v{major}.{minor}.{patch}-rc.{hotfix-number}.{date}`
 - **`master`**: `v{major}.{minor}.{patch}` (versión estable)
 
-### **Ejemplo de Secuencia por Módulo:**
+### **Ejemplo de Secuencia de Features:**
 
 ```bash
-# Módulo Depósito v1.8
+# Features listas para QA
 development → v1.7.0-beta.20231201 (versión anterior)
 feature/add-estilos-deposito → v1.8.0-alpha.1.20231201
-feature/add-submit-deposit → v1.8.0-alpha.2.20231201
-development → v1.8.0-beta.20231201 (módulo completo, features terminadas)
+feature/add-submit-deposit → v1.9.0-alpha.2.20231201
+development → v1.8.0-beta.20231201 (features listas para QA)
 release/v1.8 → v1.8.0-rc.20231201 (en QA)
 hotfix/qa-error-1.8 → v1.8.0-rc.1.20231201 (error QA)
 hotfix/qa-error-2.8 → v1.8.0-rc.2.20231201 (error QA)
 master → v1.8.0 (versión estable)
 
-# Módulo Retiros v1.9 (nuevo módulo)
-feature/add-retiros → v1.9.0-alpha.1.20231201
-development → v1.9.0-beta.20231201 (módulo completo)
+# Nuevas features
+feature/add-retiros → v1.10.0-alpha.3.20231201
+development → v1.9.0-beta.20231201 (features listas para QA)
 release/v1.9 → v1.9.0-rc.20231201 (en QA)
 
 # Hotfix de emergencia (desde master)
@@ -296,21 +284,21 @@ pnpm run gitflow dashboard
 
 ## 📝 Ejemplos de Uso
 
-### **Ejemplo 1: Desarrollo de Módulo Depósito (v1.8)**
+### **Ejemplo 1: Desarrollo de Features**
 
 ```bash
-# 1. Crear primera feature del módulo
+# 1. Crear feature desde development
 pnpm run gitflow feature add-estilos-deposito
 # Trabajar en la feature...
 
-# 2. Crear segunda feature del mismo módulo
+# 2. Crear otra feature cuando sea necesario
 pnpm run gitflow feature add-submit-deposit
 # Trabajar en la feature...
 
-# NOTA: Los features se terminan cuando creas el release desde development
+# NOTA: Cuando las features estén listas para QA, creas un release desde development
 # Development v1.7.0-beta → Release v1.8 → Development v1.8.0-beta
 
-# 3. Módulo completo → Bitbucket crea release/1.8
+# 3. Features listas → Bitbucket crea release/1.8
 # 4. Checkout del release para QA
 pnpm run gitflow checkout-release 1.8
 
