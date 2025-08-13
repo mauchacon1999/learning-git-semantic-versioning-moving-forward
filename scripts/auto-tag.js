@@ -109,7 +109,11 @@ function generateNextVersion(currentVersion, strategy, branchName) {
                 return `${major}.${minor + 1}.0`;
             }
             // Para release, mantener la versión actual
-            return `${major}.${minor}.${patch}`;
+            if (branchName.startsWith('release/')) {
+                return `${major}.${minor}.${patch}`;
+            }
+            // Para otras ramas (fix, etc.), incrementar patch
+            return `${major}.${minor}.${patch + 1}`;
 
         case 'patch':
             return `${major}.${minor}.${patch + 1}`;
@@ -127,15 +131,14 @@ function generateSuffix(strategy, branchName) {
 
     const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
-    // Para features, agregar número secuencial del release
+    // Para features, usar formato simple con timestamp
     if (branchName.startsWith('feature/')) {
         // Verificar si ya existe un tag para esta rama
         if (hasTagForCurrentBranch(branchName)) {
             return null; // Indicar que no se debe crear un nuevo tag
         }
 
-        const featureNumber = getFeatureNumberForRelease(branchName);
-        return `-alpha.${featureNumber}.${timestamp}`;
+        return `-alpha.${timestamp}`;
     }
 
     // Para hotfix, verificar si ya existe un tag para esta rama
@@ -160,10 +163,6 @@ function generateSuffix(strategy, branchName) {
         }
 
         // Si no hay tag RC, crear uno nuevo
-        const hotfixNumber = getHotfixNumber(branchName);
-        if (hotfixNumber > 0) {
-            return `-rc.${hotfixNumber}.${timestamp}`;
-        }
         return `-rc.${timestamp}`;
     }
 
@@ -175,62 +174,7 @@ function generateSuffix(strategy, branchName) {
     return strategy.suffix;
 }
 
-/**
- * Obtiene el número de feature basado en el release en proceso
- */
-function getFeatureNumberForRelease(branchName) {
-    // Extraer nombre de la feature
-    const match = branchName.match(/feature\/(.+)/);
-    if (match) {
-        const featureName = match[1];
 
-        // Obtener todos los tags existentes
-        try {
-            const existingTags = execSync('git tag --list "v*"', { encoding: 'utf8' })
-                .trim()
-                .split('\n')
-                .filter(tag => tag.length > 0);
-
-            // Obtener la versión base del último tag
-            const latestTag = getLatestTag();
-            if (latestTag) {
-                const baseVersion = extractBaseVersion(latestTag);
-
-                // Buscar tags alpha que correspondan al release actual
-                const alphaTags = existingTags.filter(tag =>
-                    tag.includes('-alpha.') &&
-                    tag.startsWith(`v${baseVersion}`)
-                );
-
-                // Si ya hay tags alpha, usar el siguiente número
-                if (alphaTags.length > 0) {
-                    return alphaTags.length + 1;
-                }
-            }
-
-            // Si no hay tags alpha para este release, empezar con 1
-            return 1;
-        } catch (error) {
-            return 1;
-        }
-    }
-    return 1;
-}
-
-/**
- * Obtiene el número de hotfix para release
- */
-function getHotfixNumber(branchName) {
-    try {
-        const hotfixes = execSync('git branch --list "hotfix/*"', { encoding: 'utf8' })
-            .trim()
-            .split('\n')
-            .filter(branch => branch.trim().length > 0);
-        return hotfixes.length;
-    } catch (error) {
-        return 0;
-    }
-}
 
 /**
  * Detecta la estrategia basada en el nombre de la rama
