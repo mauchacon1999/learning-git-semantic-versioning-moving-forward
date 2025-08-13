@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cajero</title>
+    <link rel="stylesheet" href="cashier-ui.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🏦 Sistema de Cajero</h1>
+            <div class="user-info" id="userInfo">
+                <span id="currentUser">No autenticado</span>
+                <button id="logoutBtn" class="btn-secondary" style="display: none;">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Pantalla de Login -->
+        <div class="login-screen" id="loginScreen">
+            <div class="login-card">
+                <h2>🔐 Iniciar Sesión</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="userId">ID de Usuario:</label>
+                        <input type="text" id="userId" required placeholder="Ingrese su ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="pin">PIN:</label>
+                        <input type="password" id="pin" required placeholder="Ingrese su PIN">
+                    </div>
+                    <button type="submit" class="btn-primary">Iniciar Sesión</button>
+                </form>
+                <div class="demo-info">
+                    <p><strong>Demo:</strong> PIN = 1234</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Principal del Cajero -->
+        <div class="cashier-panel" id="cashierPanel" style="display: none;">
+            <div class="balance-display">
+                <h3>💰 Saldo Actual</h3>
+                <div class="balance-amount" id="balanceAmount">$0.00</div>
+            </div>
+
+            <div class="transaction-buttons">
+                <button class="btn-primary" onclick="showTransactionModal('deposit')">
+                    💰 Depositar
+                </button>
+                <button class="btn-primary" onclick="showTransactionModal('withdraw')">
+                    💸 Retirar
+                </button>
+                <button class="btn-secondary" onclick="showHistory()">
+                    📋 Historial
+                </button>
+                <button class="btn-secondary" onclick="generateReport()">
+                    📊 Reporte Diario
+                </button>
+            </div>
+
+            <!-- Modal para transacciones -->
+            <div class="modal" id="transactionModal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <h3 id="modalTitle">Transacción</h3>
+                    <form id="transactionForm">
+                        <div class="form-group">
+                            <label for="amount">Monto:</label>
+                            <input type="number" id="amount" required min="1" step="0.01" placeholder="Ingrese el monto">
+                        </div>
+                        <button type="submit" class="btn-primary" id="transactionBtn">Confirmar</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal para historial -->
+            <div class="modal" id="historyModal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <h3>📋 Historial de Transacciones</h3>
+                    <div id="historyContent"></div>
+                </div>
+            </div>
+
+            <!-- Modal para reporte -->
+            <div class="modal" id="reportModal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <h3>📊 Reporte Diario</h3>
+                    <div id="reportContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notificaciones -->
+        <div class="notification" id="notification"></div>
+    </div>
+
+    <script src="cashier.js"></script>
+    <script src="cashier-ui.js"></script>
+</body>
+</html>
