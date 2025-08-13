@@ -17,7 +17,7 @@ const BRANCH_STRATEGIES = {
         prefix: 'v',
         description: 'Versiones estables de producción'
     },
-    'develop': {
+    'development': {
         type: 'pre-release',
         prefix: 'v',
         suffix: '-beta',
