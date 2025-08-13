@@ -146,13 +146,13 @@ function generateSuffix(strategy, branchName) {
             .trim()
             .split('\n')
             .filter(tag => tag.length > 0);
-        
+
         // Si ya hay un tag RC para este commit, no crear otro
         const hasRCTag = tagsForCommit.some(tag => tag.includes('-rc.'));
         if (hasRCTag) {
             return null; // Indicar que no se debe crear un nuevo tag
         }
-        
+
         // Si no hay tag RC, crear uno nuevo
         const hotfixNumber = getHotfixNumber(branchName);
         if (hotfixNumber > 0) {
@@ -305,21 +305,31 @@ function hasTagForCurrentBranch(branchName) {
 
         // Para hotfix, verificar si ya existe un tag para esta rama
         if (branchName.startsWith('hotfix/')) {
-            // Para hotfixes, permitir múltiples hotfixes para la misma versión
-            // Solo verificar si el commit actual ya tiene un tag
-            const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
-            const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
-                .trim()
-                .split('\n')
-                .filter(tag => tag.length > 0);
-            
-            if (tagsForCommit.length > 0) {
-                console.log(`⚠️  El commit actual ya tiene tags: ${tagsForCommit.join(', ')}`);
-                console.log(`💡 La rama ${branchName} ya tiene un tag asociado`);
-                return true;
+            // Para hotfixes, solo permitir UN tag por rama
+            // Verificar si ya existe un tag para esta rama específica
+            const latestTag = getLatestTag();
+            if (latestTag) {
+                const baseVersion = extractBaseVersion(latestTag);
+
+                // Buscar tags que correspondan a la versión base (sin sufijos)
+                const versionTags = allTags.filter(tag =>
+                    tag.startsWith(`v${baseVersion}`) &&
+                    !tag.includes('-alpha.') &&
+                    !tag.includes('-beta.') &&
+                    !tag.includes('-rc.')
+                );
+
+                // Si ya hay tags para esta versión, verificar si alguno corresponde a esta rama hotfix
+                if (versionTags.length > 0) {
+                    // Para hotfixes, asumir que si ya existe un tag para la versión base,
+                    // esta rama ya tiene su tag (no importa el commit específico)
+                    console.log(`⚠️  Ya existe un tag para la versión ${baseVersion}: ${versionTags.join(', ')}`);
+                    console.log(`💡 La rama ${branchName} ya tiene un tag asociado`);
+                    return true;
+                }
             }
-            
-            // Si no hay tags para este commit, permitir crear un nuevo hotfix
+
+            // Si no hay tags para esta versión, permitir crear uno nuevo
             return false;
         }
 
@@ -330,7 +340,7 @@ function hasTagForCurrentBranch(branchName) {
                 .trim()
                 .split('\n')
                 .filter(tag => tag.length > 0);
-            
+
             // Solo bloquear si ya hay un tag RC para este commit
             const hasRCTag = tagsForCommit.some(tag => tag.includes('-rc.'));
             if (hasRCTag) {
@@ -338,7 +348,7 @@ function hasTagForCurrentBranch(branchName) {
                 console.log(`💡 La rama ${branchName} ya tiene un tag RC asociado`);
                 return true;
             }
-            
+
             // Si no hay tag RC, permitir crear uno nuevo
             return false;
         }
