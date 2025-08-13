@@ -97,8 +97,8 @@ function generateNextVersion(currentVersion, strategy, branchName) {
             return `${major}.${minor}.${patch + 1}`;
 
         case 'pre-release':
-            // Para features, incrementar minor version
             if (branchName.startsWith('feature/')) {
+                // Para features, incrementar minor version (nuevo release)
                 return `${major}.${minor + 1}.${patch}`;
             }
             // Para development y release, mantener la versión actual
@@ -120,9 +120,9 @@ function generateSuffix(strategy, branchName) {
 
     const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
-    // Para features, agregar número secuencial
+    // Para features, agregar número secuencial del release
     if (branchName.startsWith('feature/')) {
-        const featureNumber = getFeatureNumber(branchName);
+        const featureNumber = getFeatureNumberForRelease(branchName);
         return `-alpha.${featureNumber}.${timestamp}`;
     }
 
@@ -144,20 +144,28 @@ function generateSuffix(strategy, branchName) {
 }
 
 /**
- * Obtiene el número de feature basado en el nombre
+ * Obtiene el número de feature basado en el release en proceso
  */
-function getFeatureNumber(branchName) {
-    // Extraer número del nombre de la feature
+function getFeatureNumberForRelease(branchName) {
+    // Extraer nombre de la feature
     const match = branchName.match(/feature\/(.+)/);
     if (match) {
         const featureName = match[1];
-        // Contar features existentes para obtener número secuencial
+
+        // Obtener todas las features activas (que no han sido mergeadas a development)
         try {
             const features = execSync('git branch --list "feature/*"', { encoding: 'utf8' })
                 .trim()
                 .split('\n')
-                .filter(branch => branch.trim().length > 0);
-            return features.length;
+                .filter(branch => branch.trim().length > 0)
+                .map(branch => branch.trim().replace('* ', ''));
+
+            // Ordenar alfabéticamente para mantener consistencia
+            features.sort();
+
+            // Encontrar la posición de la feature actual
+            const currentFeatureIndex = features.indexOf(branchName);
+            return currentFeatureIndex >= 0 ? currentFeatureIndex + 1 : 1;
         } catch (error) {
             return 1;
         }
