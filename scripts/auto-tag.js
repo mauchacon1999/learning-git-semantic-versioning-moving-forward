@@ -99,8 +99,8 @@ function generateNextVersion(currentVersion, strategy, branchName) {
             return `${major}.${minor}.${patch + 1}`;
 
         case 'pre-release':
-            if (branchName.startsWith('feature/')) {
-                // Para features, mantener la misma versión minor (mismo release)
+            if (branchName.startsWith('feature/') || branchName.startsWith('fix/') || branchName.startsWith('skin/')) {
+                // Para features, fixes y skins, mantener la misma versión minor (mismo release)
                 // Solo cambiar el número de feature en el sufijo
                 return `${major}.${minor}.${patch}`;
             }
@@ -109,14 +109,14 @@ function generateNextVersion(currentVersion, strategy, branchName) {
                 // Verificar si el commit actual es un merge desde master
                 const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
                 const commitMessage = execSync(`git log -1 --pretty=format:"%s"`, { encoding: 'utf8' }).trim();
-                
+
                 // Si es un merge desde master, incrementar major
-                if (commitMessage.includes('Merge branch \'main\'') || 
+                if (commitMessage.includes('Merge branch \'main\'') ||
                     commitMessage.includes('Merge branch \'master\'') ||
                     commitMessage.includes('Merge remote-tracking branch')) {
                     return `${major + 1}.0.0`;
                 }
-                
+
                 // Para otros casos, mantener la versión actual
                 return `${major}.${minor}.${patch}`;
             }
@@ -143,8 +143,8 @@ function generateSuffix(strategy, branchName) {
 
     const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
-    // Para features, usar formato simple con timestamp
-    if (branchName.startsWith('feature/')) {
+    // Para features, fixes y skins, usar formato simple con timestamp
+    if (branchName.startsWith('feature/') || branchName.startsWith('fix/') || branchName.startsWith('skin/')) {
         // Verificar si ya existe un tag para esta rama
         if (hasTagForCurrentBranch(branchName)) {
             return null; // Indicar que no se debe crear un nuevo tag
@@ -198,7 +198,7 @@ function detectStrategy(branchName) {
     }
 
     // Buscar patrones en el nombre de la rama
-    if (branchName.startsWith('feature/')) {
+    if (branchName.startsWith('feature/') || branchName.startsWith('fix/') || branchName.startsWith('skin/')) {
         return BRANCH_STRATEGIES['feature'];
     }
 
@@ -230,8 +230,8 @@ function hasTagForCurrentBranch(branchName) {
             .split('\n')
             .filter(tag => tag.length > 0);
 
-        // Para features, verificar si ya existe un tag para esta rama específica
-        if (branchName.startsWith('feature/')) {
+        // Para features, fixes y skins, verificar si ya existe un tag para esta rama específica
+        if (branchName.startsWith('feature/') || branchName.startsWith('fix/') || branchName.startsWith('skin/')) {
             // Obtener la versión base del último tag
             const latestTag = getLatestTag();
             if (latestTag) {
