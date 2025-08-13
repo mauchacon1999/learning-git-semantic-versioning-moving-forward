@@ -16,13 +16,13 @@ class UserAuth {
         this.permissions = new Map();
         this.securityLog = new Map();
         this.failedAttempts = new Map();
-        
+
         // Inicializar usuario admin por defecto
         this.initializeDefaultAdmin();
-        
+
         // Inicializar roles y permisos
         this.initializeRolesAndPermissions();
-        
+
         // Inicializar configuraciones de seguridad
         this.initializeSecurityConfig();
     }
@@ -39,7 +39,7 @@ class UserAuth {
             lastLogin: null,
             securityLevel: 'high'
         };
-        
+
         this.users.set(adminUser.id, adminUser);
         console.log('👤 Usuario admin inicializado');
     }
@@ -52,21 +52,21 @@ class UserAuth {
             level: 100,
             securityLevel: 'high'
         });
-        
+
         this.roles.set('user', {
             name: 'Usuario',
             description: 'Usuario estándar',
             level: 10,
             securityLevel: 'medium'
         });
-        
+
         this.roles.set('guest', {
             name: 'Invitado',
             description: 'Acceso limitado',
             level: 1,
             securityLevel: 'low'
         });
-        
+
         // Permisos
         this.permissions.set('read', { name: 'Lectura', description: 'Permiso de lectura' });
         this.permissions.set('write', { name: 'Escritura', description: 'Permiso de escritura' });
@@ -95,19 +95,19 @@ class UserAuth {
         if (!this.validateUsername(username)) {
             throw new Error('Nombre de usuario inválido. Debe tener entre 3 y 20 caracteres alfanuméricos.');
         }
-        
+
         if (!this.validateEmail(email)) {
             throw new Error('Email inválido. Formato incorrecto.');
         }
-        
+
         if (!this.validatePassword(password)) {
             throw new Error('Contraseña inválida. Debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales.');
         }
-        
+
         if (this.users.has(username)) {
             throw new Error('El nombre de usuario ya existe');
         }
-        
+
         if (this.getUserByEmail(email)) {
             throw new Error('El email ya está registrado');
         }
@@ -146,18 +146,18 @@ class UserAuth {
         }
 
         const user = this.getUserByUsername(username);
-        
+
         if (!user) {
             this.recordFailedAttempt(username);
             this.logSecurityEvent('login_failed', { username, reason: 'user_not_found' });
             throw new Error('Usuario no encontrado');
         }
-        
+
         if (!user.isActive) {
             this.logSecurityEvent('login_failed', { username, reason: 'account_inactive' });
             throw new Error('Usuario inactivo');
         }
-        
+
         if (user.password !== password) {
             this.recordFailedAttempt(username);
             this.logSecurityEvent('login_failed', { username, reason: 'invalid_password' });
@@ -182,7 +182,7 @@ class UserAuth {
         };
 
         this.sessions.set(sessionId, session);
-        
+
         // Actualizar último login
         user.lastLogin = new Date();
         this.users.set(user.id, user);
@@ -205,17 +205,17 @@ class UserAuth {
 
     validateSession(sessionId) {
         const session = this.sessions.get(sessionId);
-        
+
         if (!session) {
             return null;
         }
-        
+
         if (new Date() > session.expiresAt) {
             this.logSecurityEvent('session_expired', { username: session.username, sessionId });
             this.sessions.delete(sessionId);
             return null;
         }
-        
+
         return session;
     }
 
@@ -223,7 +223,7 @@ class UserAuth {
     isAccountLocked(username) {
         const user = this.getUserByUsername(username);
         if (!user) return false;
-        
+
         if (user.failedAttempts >= this.securityConfig.maxFailedAttempts) {
             if (user.lastFailedAttempt) {
                 const lockoutEnd = new Date(user.lastFailedAttempt.getTime() + this.securityConfig.lockoutDuration);
@@ -246,7 +246,7 @@ class UserAuth {
             user.failedAttempts = (user.failedAttempts || 0) + 1;
             user.lastFailedAttempt = new Date();
             this.users.set(user.id, user);
-            
+
             if (user.failedAttempts >= this.securityConfig.maxFailedAttempts) {
                 this.logSecurityEvent('account_locked', { username, failedAttempts: user.failedAttempts });
             }
@@ -262,7 +262,7 @@ class UserAuth {
             ipAddress: this.getClientIP(),
             userAgent: this.getUserAgent()
         };
-        
+
         this.securityLog.set(event.id, event);
         console.log(`🔒 Evento de seguridad: ${eventType}`, details);
     }
@@ -301,7 +301,7 @@ class UserAuth {
         if (!username || typeof username !== 'string') {
             return false;
         }
-        
+
         // Debe tener entre 3 y 20 caracteres alfanuméricos
         const usernameRegex = /^[a-zA-Z0-9]{3,20}$/;
         return usernameRegex.test(username);
@@ -311,7 +311,7 @@ class UserAuth {
         if (!email || typeof email !== 'string') {
             return false;
         }
-        
+
         // Validación de email mejorada
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
@@ -321,7 +321,7 @@ class UserAuth {
         if (!password || typeof password !== 'string') {
             return false;
         }
-        
+
         // Validación de contraseña mejorada con caracteres especiales
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
         return passwordRegex.test(password);
@@ -352,7 +352,7 @@ class UserAuth {
         if (updates.username && !this.validateUsername(updates.username)) {
             throw new Error('Nombre de usuario inválido');
         }
-        
+
         if (updates.email && !this.validateEmail(updates.email)) {
             throw new Error('Email inválido');
         }
@@ -378,7 +378,7 @@ class UserAuth {
     }
 
     getActiveSessions() {
-        return Array.from(this.sessions.values()).filter(session => 
+        return Array.from(this.sessions.values()).filter(session =>
             new Date() <= session.expiresAt
         );
     }
@@ -391,7 +391,7 @@ class UserAuth {
         const allUsers = Array.from(this.users.values());
         const activeSessions = this.getActiveSessions();
         const securityEvents = this.getSecurityLog();
-        
+
         return {
             totalUsers: allUsers.length,
             activeUsers: allUsers.filter(user => user.isActive).length,
