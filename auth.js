@@ -157,7 +157,7 @@ class UserAuth {
     login(username, password) {
         // Limpiar sesiones expiradas antes del login
         this.cleanupExpiredSessions();
-        
+
         // Verificar si la cuenta está bloqueada
         if (this.isAccountLocked(username)) {
             this.logSecurityEvent('login_blocked', { username, reason: 'account_locked' });
@@ -165,18 +165,18 @@ class UserAuth {
         }
 
         const user = this.getUserByUsername(username);
-        
+
         if (!user) {
             this.recordFailedAttempt(username);
             this.logSecurityEvent('login_failed', { username, reason: 'user_not_found' });
             throw new Error('Usuario no encontrado');
         }
-        
+
         if (!user.isActive) {
             this.logSecurityEvent('login_failed', { username, reason: 'account_inactive' });
             throw new Error('Usuario inactivo');
         }
-        
+
         if (user.password !== password) {
             this.recordFailedAttempt(username);
             this.logSecurityEvent('login_failed', { username, reason: 'invalid_password' });
@@ -207,7 +207,7 @@ class UserAuth {
         };
 
         this.sessions.set(sessionId, session);
-        
+
         // Actualizar último login
         user.lastLogin = new Date();
         this.users.set(user.id, user);
