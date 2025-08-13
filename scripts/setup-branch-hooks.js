@@ -55,8 +55,8 @@ function detectBranchType(branchName) {
     return 'main';
   }
 
-  if (branchName === 'develop') {
-    return 'develop';
+  if (branchName === 'development') {
+    return 'development';
   }
 
   if (branchName.startsWith('feature/')) {
