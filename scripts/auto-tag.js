@@ -269,7 +269,7 @@ function hasTagForCurrentBranch(branchName) {
             .split('\n')
             .filter(tag => tag.length > 0);
 
-        // Para features, verificar si ya existe un tag para esta feature específica
+        // Para features, verificar si ya existe un tag para esta rama específica
         if (branchName.startsWith('feature/')) {
             // Obtener la versión base del último tag
             const latestTag = getLatestTag();
@@ -282,25 +282,15 @@ function hasTagForCurrentBranch(branchName) {
                     tag.startsWith(`v${baseVersion}`)
                 );
 
-                // Si ya hay tags alpha para este release, verificar si alguno corresponde a esta feature
+                // Si ya hay tags alpha para este release, asumir que esta feature ya tiene su tag
                 if (alphaTags.length > 0) {
-                    // Obtener el número de feature actual
-                    const currentFeatureNumber = getFeatureNumberForRelease(branchName);
-
-                    // Verificar si ya existe un tag con este número de feature
-                    const existingTagForFeature = alphaTags.find(tag => {
-                        const match = tag.match(new RegExp(`-alpha\\.${currentFeatureNumber}\\.`));
-                        return match !== null;
-                    });
-
-                    if (existingTagForFeature) {
-                        console.log(`⚠️  Ya existe un tag para esta feature: ${existingTagForFeature}`);
-                        return true;
-                    }
-
-                    // Si no existe tag para esta feature específica, permitir crear uno nuevo
-                    return false;
+                    console.log(`⚠️  Ya existen tags alpha para el release ${baseVersion}: ${alphaTags.join(', ')}`);
+                    console.log(`💡 La rama ${branchName} ya tiene un tag asociado`);
+                    return true;
                 }
+
+                // Si no hay tags alpha para este release, permitir crear uno nuevo
+                return false;
             }
         }
 
