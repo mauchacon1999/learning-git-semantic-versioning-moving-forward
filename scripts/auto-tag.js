@@ -132,6 +132,17 @@ function generateSuffix(strategy, branchName) {
         return `-alpha.${featureNumber}.${timestamp}`;
     }
 
+    // Para hotfix, verificar si ya existe un tag para esta rama
+    if (branchName.startsWith('hotfix/')) {
+        // Verificar si ya existe un tag para esta rama
+        if (hasTagForCurrentBranch(branchName)) {
+            return null; // Indicar que no se debe crear un nuevo tag
+        }
+
+        // Para hotfix, no usar sufijo (versión estable)
+        return '';
+    }
+
     // Para release, agregar número de hotfix si es necesario
     if (branchName.startsWith('release/')) {
         const hotfixNumber = getHotfixNumber(branchName);
@@ -348,15 +359,20 @@ function autoTag() {
 
         // Generar nueva versión
         const nextVersion = generateNextVersion(baseVersion, strategy, currentBranch);
-        const suffix = generateSuffix(strategy, currentBranch);
+
+        // Debug: verificar si se está ejecutando hasTagForCurrentBranch
+        console.log(`🔍 Verificando si ya existe tag para rama: ${currentBranch}`);
+        const hasExistingTag = hasTagForCurrentBranch(currentBranch);
+        console.log(`🔍 Resultado de verificación: ${hasExistingTag}`);
 
         // Verificar si ya existe un tag para esta rama
-        if (suffix === null) {
+        if (hasExistingTag) {
             console.log('✅ Ya existe un tag para esta rama');
             console.log('💡 No se necesita crear un nuevo tag');
             return;
         }
 
+        const suffix = generateSuffix(strategy, currentBranch);
         const newTag = `${strategy.prefix}${nextVersion}${suffix}`;
 
         console.log(`🎯 Nueva versión sugerida: ${newTag}`);
