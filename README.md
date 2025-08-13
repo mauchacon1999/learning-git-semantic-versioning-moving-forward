@@ -94,7 +94,7 @@ pnpm run gitflow status
 - **Formato**: `v1.0.0`
 - **Hooks**: Verificación estricta de tags antes de push
 
-### Rama `develop`
+### Rama `development`
 - **Tipo**: Versiones beta para desarrollo
 - **Formato**: `v1.0.0-beta.20231201`
 - **Hooks**: Auto-tagging en push
