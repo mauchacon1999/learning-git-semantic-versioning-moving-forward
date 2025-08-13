@@ -104,9 +104,21 @@ function generateNextVersion(currentVersion, strategy, branchName) {
                 // Solo cambiar el número de feature en el sufijo
                 return `${major}.${minor}.${patch}`;
             }
-            // Para development, incrementar versión minor después de merge de features
+            // Para development, verificar si el merge viene de master
             if (branchName === 'development') {
-                return `${major}.${minor + 1}.0`;
+                // Verificar si el commit actual es un merge desde master
+                const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+                const commitMessage = execSync(`git log -1 --pretty=format:"%s"`, { encoding: 'utf8' }).trim();
+                
+                // Si es un merge desde master, incrementar major
+                if (commitMessage.includes('Merge branch \'main\'') || 
+                    commitMessage.includes('Merge branch \'master\'') ||
+                    commitMessage.includes('Merge remote-tracking branch')) {
+                    return `${major + 1}.0.0`;
+                }
+                
+                // Para otros casos, mantener la versión actual
+                return `${major}.${minor}.${patch}`;
             }
             // Para release, mantener la versión actual
             if (branchName.startsWith('release/')) {
