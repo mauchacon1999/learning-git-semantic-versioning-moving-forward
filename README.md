@@ -1,472 +1,225 @@
-# Learning Git Semantic Versioning Moving Forward
+# Sistema GitFlow con Auto-tagging
 
-Sistema de GitFlow adaptado para tu flujo de trabajo con tags automáticos y comandos específicos para desarrollo, QA y producción, integrado con Bitbucket.
+Este proyecto implementa un sistema GitFlow automatizado con versionado semántico y auto-tagging basado en el tipo de rama.
 
-## 🎯 Objetivo
+## 🎯 Características
 
-Sistema de GitFlow adaptado a tu flujo de trabajo con tags automáticos y comandos específicos para desarrollo, QA y producción, integrado con Bitbucket.
+- **Auto-tagging inteligente** por tipo de rama
+- **Versionado semántico** automático
+- **Integración con Husky** para hooks de Git
+- **Sistema de hotfixes** para correcciones urgentes
+- **Flujo QA automatizado** con release candidates
 
-## 🚀 Configuración
+## 🌿 Estrategias de Versionado
 
-### Prerrequisitos
+### Features (`feature/*`)
 
-- Node.js 22.17.0 o superior
-- pnpm
-- Git
-- Bitbucket
+- **Tipo:** Pre-release (alpha)
+- **Formato:** `v1.1.0-alpha.1.20250813`
+- **Descripción:** Versiones alpha para features en desarrollo
 
-### Instalación
+### Development
 
-```bash
-pnpm install
-```
-
-## 🌿 Flujo de Trabajo con Bitbucket
+- **Tipo:** Pre-release (beta)
+- **Formato:** `v1.1.0-beta.20250813`
+- **Descripción:** Versiones beta para desarrollo
 
-### **1. Desarrollo de Features**
+### Release (`release/*`)
 
-```bash
-# Crear feature desde development
-pnpm run gitflow feature add-estilos-deposito
-# → Crea: feature/add-estilos-deposito
-# → Auto-tag: v1.8.0-alpha.1.20231201
+- **Tipo:** Pre-release (RC)
+- **Formato:** `v1.1.0-rc.1.20250813`
+- **Descripción:** Versiones release candidate para QA
 
-# Trabajar en la feature
-git add .
-git commit -m "feat: agregar estilos de depósito"
+### Hotfix (`hotfix/*`)
 
-# Crear otra feature cuando sea necesario
-pnpm run gitflow feature add-submit-deposit
-# → Crea: feature/add-submit-deposit
-# → Auto-tag: v1.9.0-alpha.2.20231201
-
-# Trabajar en la feature
-git add .
-git commit -m "feat: agregar funcionalidad de submit"
-
-# NOTA: Cuando las features estén listas para QA, creas un release desde development
-```
+- **Tipo:** Patch
+- **Formato:** `v1.1.6`
+- **Descripción:** Versiones de parche para correcciones urgentes
 
-#### **Ejemplo: Desarrollo de Features**
-
-```bash
-# Feature 1 - Estilos de depósito
-pnpm run gitflow feature add-estilos-deposito
-# → feature/add-estilos-deposito (v1.8.0-alpha.1.20231201)
+### Master/Main
 
-# Feature 2 - Funcionalidad de submit
-pnpm run gitflow feature add-submit-deposit
-# → feature/add-submit-deposit (v1.9.0-alpha.2.20231201)
-
-# Feature 3 - Funcionalidad de retiros
-pnpm run gitflow feature add-retiros
-# → feature/add-retiros (v1.10.0-alpha.3.20231201)
-
-# Trabajar en las features según prioridad
-# - feature/add-estilos-deposito: Estilos de depósito
-# - feature/add-submit-deposit: Funcionalidad de submit
-# - feature/add-retiros: Funcionalidad de retiros
-
-# NOTA: Cuando las features estén listas para QA, creas un release desde development
-# Development v1.7.0-beta → Release v1.8 → Development v1.8.0-beta
-```
-
-### **2. Features Listas → Release para QA**
-
-```bash
-# Cuando las features están listas para QA
-# Bitbucket crea release/1.8 automáticamente desde development
-# Tú haces checkout manual:
-git checkout release/1.8
-# O usar comando de checkout:
-pnpm run gitflow checkout-release 1.8
-# → Auto-tag: v1.8.0-rc.20231201
-# → [DESPLIEGUE A AMBIENTE QA]
-
-# Ejemplo: Features listas para QA
-# - Development v1.7.0-beta (versión anterior)
-# - feature/add-estilos-deposito ✅ (en development)
-# - feature/add-submit-deposit ✅ (en development)
-# → Crear release/v1.8 → Development se actualiza a v1.8.0-beta
-```
-
-### **3. QA Reporta Errores → Hotfix de QA**
-
-```bash
-# QA reporta error en release/1.8 → crear hotfix desde release
-pnpm run gitflow qa-hotfix qa-error-1.8
-# → Crea: hotfix/qa-error-1.8 desde release/v1.8
-# → Auto-tag: v1.8.0-rc.1.20231201
-# → Crea PR automáticamente a release/1.8
-
-# Corregir error
-git add .
-git commit -m "fix: corregir error reportado por QA"
-
-# Finalizar hotfix de QA
-pnpm run gitflow finish-qa-hotfix
-# → Merge a release/v1.8
-# → Auto-tag: v1.8.0-rc.2.20231201
-# → [NUEVO DESPLIEGUE A QA]
-```
-
-### **4. QA Aprueba → Pasar a Master**
-
-```bash
-# QA aprueba → pasar a master
-pnpm run gitflow qa-approve 1.8
-# → Merge a master
-# → Auto-tag: v1.8.0 (versión estable)
-# → Merge a development
-# → Elimina release/1.8
-# → Crea PR automáticamente a master
-```
-
-### **5. Error en Producción → Hotfix de Emergencia**
-
-```bash
-# Problema en producción (master) → hotfix urgente desde master
-pnpm run gitflow hotfix critical-bug
-# → Crea: hotfix/critical-bug desde master
-# → Auto-tag: v1.8.1 (patch)
-
-# Corregir problema
-git add .
-git commit -m "fix: corregir bug crítico en producción"
-
-# Finalizar hotfix de emergencia
-pnpm run gitflow finish-hotfix
-# → Merge a master
-# → Auto-tag: v1.8.1 (versión estable)
-# → Merge a development
-# → [DESPLIEGUE URGENTE A PRODUCCIÓN]
-```
-
-## 🏷️ Estrategia de Tags
-
-### **Tags por Rama:**
-
-- **`feature/*`**: `v{major}.{minor}.{patch}-alpha.{feature-number}.{date}`
-- **`development`**: `v{major}.{minor}.{patch}-beta.{date}`
-- **`release/*`**: `v{major}.{minor}.{patch}-rc.{hotfix-number}.{date}`
-- **`master`**: `v{major}.{minor}.{patch}` (versión estable)
-
-### **Ejemplo de Secuencia de Features:**
-
-```bash
-# Features listas para QA
-development → v1.7.0-beta.20231201 (versión anterior)
-feature/add-estilos-deposito → v1.8.0-alpha.1.20231201
-feature/add-submit-deposit → v1.9.0-alpha.2.20231201
-development → v1.8.0-beta.20231201 (features listas para QA)
-release/v1.8 → v1.8.0-rc.20231201 (en QA)
-hotfix/qa-error-1.8 → v1.8.0-rc.1.20231201 (error QA)
-hotfix/qa-error-2.8 → v1.8.0-rc.2.20231201 (error QA)
-master → v1.8.0 (versión estable)
-
-# Nuevas features
-feature/add-retiros → v1.10.0-alpha.3.20231201
-development → v1.9.0-beta.20231201 (features listas para QA)
-release/v1.9 → v1.9.0-rc.20231201 (en QA)
-
-# Hotfix de emergencia (desde master)
-hotfix/critical-bug → v1.8.1 (versión estable)
-```
-
-## 🔧 Comandos Disponibles
-
-### **Comandos Principales:**
-
-```bash
-# Features
-pnpm run gitflow feature <nombre>          # Crear feature
-# NOTA: Los features se terminan cuando creas el release desde development
-
-# Releases (adaptados para Bitbucket)
-pnpm run gitflow checkout-release <version>  # Checkout release existente
-pnpm run gitflow qa-approve <version>      # Aprobar QA → master
-
-# Hotfixes
-pnpm run gitflow qa-hotfix <nombre>        # Hotfix desde release (errores QA)
-pnpm run gitflow finish-qa-hotfix          # Finalizar hotfix de QA
-pnpm run gitflow hotfix <nombre>           # Hotfix desde master (emergencia producción)
-pnpm run gitflow finish-hotfix             # Finalizar hotfix de emergencia
-
-# Información
-pnpm run gitflow status                    # Ver estado actual
-pnpm run gitflow dashboard                 # Dashboard completo
-```
-
-### **Comandos de Verificación:**
-
-```bash
-pnpm run gitflow verify-release <version>  # Verificar release para QA
-pnpm run gitflow verify-qa-hotfixes <version>  # Verificar hotfixes de QA
-pnpm run gitflow verify-production         # Verificar producción
-```
-
-### **Comandos de Información:**
-
-```bash
-pnpm run gitflow qa-report <version>       # Reporte de QA
-pnpm run gitflow changelog <version>       # Changelog
-pnpm run gitflow release-notes <version>   # Release notes
-```
-
-### **Comandos para Bitbucket:**
-
-```bash
-pnpm run gitflow list-releases             # Listar releases disponibles
-pnpm run gitflow release-info <version>    # Información del release
-pnpm run gitflow sync-bitbucket-release <version>  # Sincronizar con Bitbucket
-pnpm run gitflow create-pr-release <version>  # Crear Pull Request para release
-```
-
-## 🌐 Integración con Bitbucket
-
-### **Pull Requests Automáticos:**
-
-```bash
-# Al crear feature
-pnpm run gitflow feature <nombre>
-# → Crea PR automáticamente a development cuando hagas merge
-
-# Al crear hotfix de QA
-pnpm run gitflow qa-hotfix qa-error-1
-# → Crea PR automáticamente a release/1.8
-
-# Al aprobar QA
-pnpm run gitflow qa-approve 1.8
-# → Crea PR automáticamente a master
-```
-
-### **Webhooks de Bitbucket:**
-
-```bash
-# Configurar webhooks para:
-# - Creación de release branches
-# - Merge de PRs
-# - Tags automáticos
-```
-
-## 📊 Dashboard de Estado
-
-```bash
-pnpm run gitflow dashboard
-
-# Salida esperada:
- Estado del Sistema GitFlow
-
- Development: v1.9.0-beta.20231201
-   Features activas: 2
-   📋 Último merge: feature/add-submit-deposit
-   📋 PRs pendientes: 0
-
-📋 Releases disponibles:
-   - release/1.8 (creado por Bitbucket)
-   - release/1.9 (creado por Bitbucket)
-
- Release: v1.8.0-rc.2.20231201
-   📋 Estado: En QA
-   Hotfixes aplicados: 2
-   Errores pendientes: 0
-   📋 PRs activos: 1
-
-✅ Production: v1.7.0
-   Estado: Estable
-   Último deploy: 2023-12-01
-
- Bitbucket Status:
-   Webhooks: Activos
-   PRs: Sincronizados
-   📋 Tags: Sincronizados
-```
+- **Tipo:** Stable
+- **Formato:** `v1.1.0`
+- **Descripción:** Versiones estables de producción
 
-## 📝 Ejemplos de Uso
-
-### **Ejemplo 1: Desarrollo de Features**
+## 🚀 Comandos Disponibles
 
-```bash
-# 1. Crear feature desde development
-pnpm run gitflow feature add-estilos-deposito
-# Trabajar en la feature...
-
-# 2. Crear otra feature cuando sea necesario
-pnpm run gitflow feature add-submit-deposit
-# Trabajar en la feature...
-
-# NOTA: Cuando las features estén listas para QA, creas un release desde development
-# Development v1.7.0-beta → Release v1.8 → Development v1.8.0-beta
-
-# 3. Features listas → Bitbucket crea release/1.8
-# 4. Checkout del release para QA
-pnpm run gitflow checkout-release 1.8
-
-# 5. QA reporta errores → hotfix desde release
-pnpm run gitflow qa-hotfix qa-error-1.8
-# Corregir error...
-pnpm run gitflow finish-qa-hotfix
-
-# 6. QA aprueba → pasar a master
-pnpm run gitflow qa-approve 1.8
-```
-
-### **Ejemplo 2: Hotfix de Emergencia (Error en Producción)**
-
-```bash
-# Problema crítico en producción (master)
-pnpm run gitflow hotfix critical-bug
-# Corregir problema urgente...
-pnpm run gitflow finish-hotfix
-# → Despliegue urgente a producción
-```
-
-## 🔥 Tipos de Hotfixes
-
-### **1. Hotfix de QA (desde release)**
-
-```bash
-# QA reporta error en release/v1.8
-pnpm run gitflow qa-hotfix qa-error-1.8
-# → Crea hotfix desde release/1.8
-# → Corregir error reportado por QA
-# → Merge a release/1.8
-# → Nuevo despliegue a QA
-# → QA continúa probando hasta que no hay más errores
-```
-
-### **2. Hotfix de Emergencia (desde master)**
-
-```bash
-# Error crítico en producción
-pnpm run gitflow hotfix critical-bug
-# → Crea hotfix desde master
-# → Corregir problema urgente
-# → Merge a master
-# → Despliegue urgente a producción
-```
-
-## 🔍 Verificaciones Automáticas
-
-### **Pre-commit:**
-
-- Verificar formato de commits
-- Verificar que no haya cambios sin commitear
-
-### **Pre-push:**
-
-- Auto-tagging según la rama
-- Verificar que existan tags válidos
-
-### **Pre-checkout-release:**
-
-- Verificar que release existe en Bitbucket
-- Verificar que development esté estable
-- Verificar que no haya features sin finalizar
-- Verificar estado de PRs
-
-### **Pre-qa-approve:**
-
-- Verificar que no haya hotfixes pendientes
-- Verificar que release esté listo para producción
-- QA solo reporta errores, no rechaza releases
-
-## ⚠️ Consideraciones
-
-### **Conflictos:**
-
-- Los hotfixes de QA se aplican sobre release
-- Los hotfixes de emergencia se aplican sobre master
-- Development siempre se mantiene actualizado
-
-### **Rollback:**
-
-- Si hay problemas en producción, se puede hacer rollback a versión anterior
-- QA solo reporta errores, no rechaza releases
-
-### **Integración:**
-
-- El sistema se integra con Husky para hooks automáticos
-- Los tags se crean automáticamente según la rama
-- Las verificaciones se ejecutan antes de cada operación
-- Sincronización automática con Bitbucket
-
-## 🛠️ Comandos Útiles
-
-```bash
-# Ver todos los tags
-git tag
-
-# Ver información de un tag específico
-git show v1.0.0
-
-# Eliminar un tag local
-git tag -d v1.0.0
-
-# Eliminar un tag remoto
-git push origin --delete v1.0.0
-
-# Ver commits entre dos tags
-git log v1.0.0..v1.1.0
-
-# Ver estado de Bitbucket
-pnpm run gitflow bitbucket-status
-```
-
-## 🎯 Versionado Semántico
-
-Sigue el estándar [SemVer](https://semver.org/):
-
-- **MAJOR** (1.0.0): Cambios incompatibles con versiones anteriores
-- **MINOR** (1.1.0): Nuevas funcionalidades compatibles
-- **PATCH** (1.0.1): Correcciones de bugs compatibles
-
-## 📋 Scripts Disponibles
-
-### 1. Verificar Tags Existentes
-
-```bash
-pnpm run verify-tags
-```
-
-### 2. Listar Tags
-
-```bash
-pnpm run list-tags
-```
-
-### 3. Crear Nuevo Tag
-
-```bash
-# Crear tag interactivamente
-pnpm run create-tag
-
-# Crear tag específico
-pnpm run create-tag v1.0.0
-```
-
-### 4. Auto-tagging por Rama
+### Auto-tagging
 
 ```bash
 pnpm run auto-tag
 ```
 
-### 5. Configurar Hooks por Rama
+Genera automáticamente tags basados en el tipo de rama actual.
+
+### Verificación de Tags
 
 ```bash
-# Configurar hooks para la rama actual
-pnpm run setup-branch-hooks
-
-# Ver estrategias disponibles
-pnpm run setup-branch-hooks --show
+pnpm run verify-tags
 ```
 
-## 🔧 Hooks de Git (Husky)
+Verifica que el commit actual tenga un tag asociado.
 
-### Pre-commit
+### GitFlow Manager
 
-Se ejecuta automáticamente antes de cada commit para verificar el estado del repositorio.
+```bash
+pnpm run gitflow <comando>
+```
 
-### Pre-push
+#### Comandos Disponibles:
 
-Se ejecuta automáticamente antes de cada push para verificar que existan tags válidos.
+- `create-feature <nombre>` - Crear nueva rama feature
+- `checkout-release <version>` - Cambiar a rama release
+- `create-qa-hotfix <nombre>` - Crear hotfix para QA
+- `finish-qa-hotfix` - Finalizar hotfix de QA
+- `qa-approve <version>` - Aprobar release para producción
+- `create-hotfix <nombre>` - Crear hotfix de emergencia
+- `finish-hotfix` - Finalizar hotfix de emergencia
+- `dashboard` - Mostrar estado del sistema
+
+## 🔄 Flujo de Trabajo
+
+### 1. Desarrollo de Features
+
+```bash
+# Crear feature
+pnpm run gitflow create-feature nueva-funcionalidad
+
+# Trabajar en la feature
+# Hacer commits...
+
+# Auto-tagging automático
+pnpm run auto-tag
+# Sugiere: v1.1.0-alpha.1.20250813
+```
+
+### 2. Integración en Development
+
+```bash
+# Merge a development
+git checkout development
+git merge feature/nueva-funcionalidad
+
+# Auto-tagging
+pnpm run auto-tag
+# Sugiere: v1.1.0-beta.20250813
+```
+
+### 3. Creación de Release
+
+```bash
+# Bitbucket crea release/1.1.0
+git checkout release/1.1.0
+
+# Auto-tagging
+pnpm run auto-tag
+# Sugiere: v1.1.0-rc.1.20250813
+```
+
+### 4. Hotfixes de QA
+
+```bash
+# Crear hotfix desde release
+pnpm run gitflow create-qa-hotfix correccion-qa
+
+# Trabajar en el hotfix
+# Hacer commits...
+
+# Auto-tagging
+pnpm run auto-tag
+# Sugiere: v1.1.1
+
+# Merge a release
+git checkout release/1.1.0
+git merge hotfix/qa-fix-correccion-qa
+
+# Nuevo RC automático
+pnpm run auto-tag
+# Sugiere: v1.1.1-rc.2.20250813
+```
+
+### 5. Aprobación de QA
+
+```bash
+# QA aprueba el release
+pnpm run gitflow qa-approve 1.1.1
+
+# Merge automático a master
+# Tag estable creado: v1.1.1
+```
+
+### 6. Hotfixes de Emergencia
+
+```bash
+# Crear hotfix desde master
+pnpm run gitflow create-hotfix correccion-emergencia
+
+# Trabajar en el hotfix
+# Hacer commits...
+
+# Auto-tagging
+pnpm run auto-tag
+# Sugiere: v1.1.2
+
+# Finalizar hotfix
+pnpm run gitflow finish-hotfix
+
+# Merge automático a master y development
+# Tag estable creado: v1.1.2
+```
+
+## 📊 Estado del Sistema
+
+### Tags Actuales
+
+```
+Release 1.1.0:
+├── v1.1.0-alpha.1.20250813 (primera feature)
+├── v1.1.0-alpha.2.20250813 (segunda feature)
+├── v1.1.0-alpha.3.20250813 (tercera feature)
+├── v1.1.0-beta.20250813 (development)
+├── v1.1.0-rc.1.20250813 (release inicial)
+├── v1.1.1 (primer hotfix - payment)
+├── v1.1.1-rc.2.20250813 (release con primer hotfix)
+├── v1.1.2 (segundo hotfix - auth)
+├── v1.1.2-rc.3.20250813 (release con segundo hotfix)
+├── v1.1.3 (tercer hotfix - UI responsive)
+├── v1.1.3-rc.4.20250813 (release con tercer hotfix)
+├── v1.1.4 (cuarto hotfix - security validation)
+├── v1.1.5 (cuarto hotfix - additional security)
+├── v1.1.5-rc.5.20250813 (release con cuarto hotfix)
+├── v1.1.6 (quinto hotfix - database connection)
+└── v1.1.6-rc.6.20250813 (release con quinto hotfix)
+```
+
+## 🔧 Configuración
+
+### Husky Hooks
+
+- **pre-commit:** Verifica que el commit tenga un mensaje válido
+- **pre-push:** Verifica que el commit actual tenga un tag asociado
+
+### Scripts de Auto-tagging
+
+- **auto-tag.js:** Lógica principal de auto-tagging
+- **verify-tags.js:** Verificación de tags existentes
+- **gitflow-manager.js:** Gestión de comandos GitFlow
+
+## 🎯 Beneficios
+
+1. **Versionado automático** - No más tags manuales
+2. **Trazabilidad completa** - Cada cambio tiene su tag
+3. **Flujo estandarizado** - Proceso consistente para todo el equipo
+4. **Integración con Bitbucket** - Compatible con el flujo de QA
+5. **Hotfixes organizados** - Separación clara entre QA y emergencias
+
+## 🚀 Próximos Pasos
+
+- [ ] Implementar notificaciones automáticas
+- [ ] Integrar con sistemas de CI/CD
+- [ ] Agregar métricas de versionado
+- [ ] Documentar casos edge
+
+---
+
+**Sistema GitFlow Completamente Funcional y Probado** ✅

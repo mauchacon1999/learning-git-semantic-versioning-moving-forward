@@ -97,9 +97,10 @@ function generateNextVersion(currentVersion, strategy, branchName) {
             return `${major}.${minor}.${patch + 1}`;
 
         case 'pre-release':
-            // Para features, incrementar minor version
             if (branchName.startsWith('feature/')) {
-                return `${major}.${minor + 1}.${patch}`;
+                // Para features, mantener la misma versión minor (mismo release)
+                // Solo cambiar el número de feature en el sufijo
+                return `${major}.${minor}.${patch}`;
             }
             // Para development y release, mantener la versión actual
             return `${major}.${minor}.${patch}`;
@@ -120,14 +121,39 @@ function generateSuffix(strategy, branchName) {
 
     const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
-    // Para features, agregar número secuencial
+    // Para features, agregar número secuencial del release
     if (branchName.startsWith('feature/')) {
-        const featureNumber = getFeatureNumber(branchName);
+        // Verificar si ya existe un tag para esta rama
+        if (hasTagForCurrentBranch(branchName)) {
+            return null; // Indicar que no se debe crear un nuevo tag
+        }
+
+        const featureNumber = getFeatureNumberForRelease(branchName);
         return `-alpha.${featureNumber}.${timestamp}`;
+    }
+
+    // Para hotfix, verificar si ya existe un tag para esta rama
+    if (branchName.startsWith('hotfix/')) {
+        // Para hotfix, no usar sufijo (versión estable)
+        return '';
     }
 
     // Para release, agregar número de hotfix si es necesario
     if (branchName.startsWith('release/')) {
+        // Verificar si el commit actual ya tiene un tag RC
+        const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+        const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
+            .trim()
+            .split('\n')
+            .filter(tag => tag.length > 0);
+
+        // Si ya hay un tag RC para este commit, no crear otro
+        const hasRCTag = tagsForCommit.some(tag => tag.includes('-rc.'));
+        if (hasRCTag) {
+            return null; // Indicar que no se debe crear un nuevo tag
+        }
+
+        // Si no hay tag RC, crear uno nuevo
         const hotfixNumber = getHotfixNumber(branchName);
         if (hotfixNumber > 0) {
             return `-rc.${hotfixNumber}.${timestamp}`;
@@ -144,20 +170,40 @@ function generateSuffix(strategy, branchName) {
 }
 
 /**
- * Obtiene el número de feature basado en el nombre
+ * Obtiene el número de feature basado en el release en proceso
  */
-function getFeatureNumber(branchName) {
-    // Extraer número del nombre de la feature
+function getFeatureNumberForRelease(branchName) {
+    // Extraer nombre de la feature
     const match = branchName.match(/feature\/(.+)/);
     if (match) {
         const featureName = match[1];
-        // Contar features existentes para obtener número secuencial
+
+        // Obtener todos los tags existentes
         try {
-            const features = execSync('git branch --list "feature/*"', { encoding: 'utf8' })
+            const existingTags = execSync('git tag --list "v*"', { encoding: 'utf8' })
                 .trim()
                 .split('\n')
-                .filter(branch => branch.trim().length > 0);
-            return features.length;
+                .filter(tag => tag.length > 0);
+
+            // Obtener la versión base del último tag
+            const latestTag = getLatestTag();
+            if (latestTag) {
+                const baseVersion = extractBaseVersion(latestTag);
+
+                // Buscar tags alpha que correspondan al release actual
+                const alphaTags = existingTags.filter(tag =>
+                    tag.includes('-alpha.') &&
+                    tag.startsWith(`v${baseVersion}`)
+                );
+
+                // Si ya hay tags alpha, usar el siguiente número
+                if (alphaTags.length > 0) {
+                    return alphaTags.length + 1;
+                }
+            }
+
+            // Si no hay tags alpha para este release, empezar con 1
+            return 1;
         } catch (error) {
             return 1;
         }
@@ -212,6 +258,105 @@ function detectStrategy(branchName) {
 }
 
 /**
+ * Verifica si ya existe un tag para la rama actual
+ */
+function hasTagForCurrentBranch(branchName) {
+    try {
+        // Obtener todos los tags
+        const allTags = execSync('git tag --list "v*"', { encoding: 'utf8' })
+            .trim()
+            .split('\n')
+            .filter(tag => tag.length > 0);
+
+        // Para features, verificar si ya existe un tag para esta feature específica
+        if (branchName.startsWith('feature/')) {
+            // Obtener la versión base del último tag
+            const latestTag = getLatestTag();
+            if (latestTag) {
+                const baseVersion = extractBaseVersion(latestTag);
+
+                // Buscar tags alpha que correspondan al release actual
+                const alphaTags = allTags.filter(tag =>
+                    tag.includes('-alpha.') &&
+                    tag.startsWith(`v${baseVersion}`)
+                );
+
+                // Si ya hay tags alpha para este release, verificar si alguno corresponde a esta feature
+                if (alphaTags.length > 0) {
+                    // Obtener el número de feature actual
+                    const currentFeatureNumber = getFeatureNumberForRelease(branchName);
+
+                    // Verificar si ya existe un tag con este número de feature
+                    const existingTagForFeature = alphaTags.find(tag => {
+                        const match = tag.match(new RegExp(`-alpha\\.${currentFeatureNumber}\\.`));
+                        return match !== null;
+                    });
+
+                    if (existingTagForFeature) {
+                        console.log(`⚠️  Ya existe un tag para esta feature: ${existingTagForFeature}`);
+                        return true;
+                    }
+
+                    // Si no existe tag para esta feature específica, permitir crear uno nuevo
+                    return false;
+                }
+            }
+        }
+
+        // Para hotfix, verificar si ya existe un tag para esta rama
+        if (branchName.startsWith('hotfix/')) {
+            // Para hotfixes, permitir múltiples hotfixes secuenciales
+            // Solo verificar si el commit actual ya tiene un tag
+            const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+            const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
+                .trim()
+                .split('\n')
+                .filter(tag => tag.length > 0);
+            
+            if (tagsForCommit.length > 0) {
+                console.log(`⚠️  El commit actual ya tiene tags: ${tagsForCommit.join(', ')}`);
+                console.log(`💡 La rama ${branchName} ya tiene un tag asociado`);
+                return true;
+            }
+            
+            // Si no hay tags para este commit, permitir crear un nuevo hotfix
+            return false;
+        }
+
+        // Para release, verificar si ya existe un tag RC para este commit
+        if (branchName.startsWith('release/')) {
+            const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+            const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
+                .trim()
+                .split('\n')
+                .filter(tag => tag.length > 0);
+
+            // Solo bloquear si ya hay un tag RC para este commit
+            const hasRCTag = tagsForCommit.some(tag => tag.includes('-rc.'));
+            if (hasRCTag) {
+                console.log(`⚠️  El commit actual ya tiene un tag RC: ${tagsForCommit.find(tag => tag.includes('-rc.'))}`);
+                console.log(`💡 La rama ${branchName} ya tiene un tag RC asociado`);
+                return true;
+            }
+
+            // Si no hay tag RC, permitir crear uno nuevo
+            return false;
+        }
+
+        // Para otras ramas, verificar si hay tags que apunten al commit actual
+        const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+        const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
+            .trim()
+            .split('\n')
+            .filter(tag => tag.length > 0);
+
+        return tagsForCommit.length > 0;
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
  * Función principal de auto-tagging
  */
 function autoTag() {
@@ -239,6 +384,19 @@ function autoTag() {
 
         // Generar nueva versión
         const nextVersion = generateNextVersion(baseVersion, strategy, currentBranch);
+
+        // Debug: verificar si se está ejecutando hasTagForCurrentBranch
+        console.log(`🔍 Verificando si ya existe tag para rama: ${currentBranch}`);
+        const hasExistingTag = hasTagForCurrentBranch(currentBranch);
+        console.log(`🔍 Resultado de verificación: ${hasExistingTag}`);
+
+        // Verificar si ya existe un tag para esta rama
+        if (hasExistingTag) {
+            console.log('✅ Ya existe un tag para esta rama');
+            console.log('💡 No se necesita crear un nuevo tag');
+            return;
+        }
+
         const suffix = generateSuffix(strategy, currentBranch);
         const newTag = `${strategy.prefix}${nextVersion}${suffix}`;
 
