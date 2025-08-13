@@ -2,6 +2,7 @@
  * Sistema de Pagos
  * Feature: add-payment-system
  * Hotfix: qa-fix-payment-validation
+ * Hotfix: qa-fix-payment-validation ,,,,
  */
 
 class PaymentSystem {
