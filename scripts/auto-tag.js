@@ -305,31 +305,21 @@ function hasTagForCurrentBranch(branchName) {
 
         // Para hotfix, verificar si ya existe un tag para esta rama
         if (branchName.startsWith('hotfix/')) {
-            // Para hotfixes, solo permitir UN tag por rama
-            // Verificar si ya existe un tag para esta rama específica
-            const latestTag = getLatestTag();
-            if (latestTag) {
-                const baseVersion = extractBaseVersion(latestTag);
-
-                // Buscar tags que correspondan a la versión base (sin sufijos)
-                const versionTags = allTags.filter(tag =>
-                    tag.startsWith(`v${baseVersion}`) &&
-                    !tag.includes('-alpha.') &&
-                    !tag.includes('-beta.') &&
-                    !tag.includes('-rc.')
-                );
-
-                // Si ya hay tags para esta versión, verificar si alguno corresponde a esta rama hotfix
-                if (versionTags.length > 0) {
-                    // Para hotfixes, asumir que si ya existe un tag para la versión base,
-                    // esta rama ya tiene su tag (no importa el commit específico)
-                    console.log(`⚠️  Ya existe un tag para la versión ${baseVersion}: ${versionTags.join(', ')}`);
-                    console.log(`💡 La rama ${branchName} ya tiene un tag asociado`);
-                    return true;
-                }
+            // Para hotfixes, permitir múltiples hotfixes secuenciales
+            // Solo verificar si el commit actual ya tiene un tag
+            const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+            const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
+                .trim()
+                .split('\n')
+                .filter(tag => tag.length > 0);
+            
+            if (tagsForCommit.length > 0) {
+                console.log(`⚠️  El commit actual ya tiene tags: ${tagsForCommit.join(', ')}`);
+                console.log(`💡 La rama ${branchName} ya tiene un tag asociado`);
+                return true;
             }
-
-            // Si no hay tags para esta versión, permitir crear uno nuevo
+            
+            // Si no hay tags para este commit, permitir crear un nuevo hotfix
             return false;
         }
 
