@@ -78,10 +78,11 @@ function extractBaseVersion(tag) {
 
     // Remover prefijo y sufijos
     let version = tag.replace(/^v/, '');
-    version = version.replace(/-alpha.*$/, '');
-    version = version.replace(/-beta.*$/, '');
-    version = version.replace(/-rc.*$/, '');
+    version = version.replace(/-alpha\..*$/, '');
+    version = version.replace(/-beta\..*$/, '');
+    version = version.replace(/-rc\..*$/, '');
     version = version.replace(/-stable.*$/, '');
+    version = version.replace(/-dev.*$/, '');
     version = version.replace(/\+.*$/, '');
 
     return version;
