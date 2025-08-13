@@ -81,6 +81,7 @@ function extractBaseVersion(tag) {
     version = version.replace(/-alpha.*$/, '');
     version = version.replace(/-beta.*$/, '');
     version = version.replace(/-rc.*$/, '');
+    version = version.replace(/-stable.*$/, '');
     version = version.replace(/\+.*$/, '');
 
     return version;
