@@ -6,6 +6,14 @@
 class UserAuth {
     constructor() {
         this.users = new Map();
+        this.users.set('admin', {
+            id: '1',
+            username: 'admin',
+            email: 'admin@example.com',
+            password: this.hashPassword('admin'),
+            createdAt: new Date(),
+            isActive: true
+        });
         this.sessions = new Map();
     }
 
