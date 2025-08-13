@@ -8,6 +8,7 @@
  * - qa-fix-auth-validation
  * - qa-fix-security-validation
  * - qa-fix-auth-stats
+ * - qa-fix-auth-session-limit
  *  ,mmsms
  * msmsmsmsms
  * Mauricio.
