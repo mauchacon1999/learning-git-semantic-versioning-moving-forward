@@ -1,45 +1,17 @@
 #!/usr/bin/env node
 
 const { execSync } = require('child_process');
-const fs = require('fs');
 
 /**
  * Estrategias de versionado por rama
  */
 const BRANCH_STRATEGIES = {
-    'main': {
-        type: 'stable',
-        prefix: 'v',
-        description: 'Versiones estables de producción'
-    },
-    'master': {
-        type: 'stable',
-        prefix: 'v',
-        description: 'Versiones estables de producción'
-    },
-    'development': {
-        type: 'pre-release',
-        prefix: 'v',
-        suffix: '-beta',
-        description: 'Versiones beta para desarrollo'
-    },
-    'feature': {
-        type: 'pre-release',
-        prefix: 'v',
-        suffix: '-alpha',
-        description: 'Versiones alpha para features'
-    },
-    'release': {
-        type: 'pre-release',
-        prefix: 'v',
-        suffix: '-rc',
-        description: 'Versiones release candidate para QA'
-    },
-    'hotfix': {
-        type: 'patch',
-        prefix: 'v',
-        description: 'Versiones de parche para correcciones urgentes'
-    }
+    'main': { type: 'stable', prefix: 'v', description: 'Versiones estables de producción' },
+    'master': { type: 'stable', prefix: 'v', description: 'Versiones estables de producción' },
+    'development': { type: 'pre-release', prefix: 'v', suffix: '-beta', description: 'Versiones beta para desarrollo' },
+    'feature': { type: 'pre-release', prefix: 'v', suffix: '-alpha', description: 'Versiones alpha para features' },
+    'release': { type: 'pre-release', prefix: 'v', suffix: '-rc', description: 'Versiones release candidate para QA' },
+    'hotfix': { type: 'patch', prefix: 'v', description: 'Versiones de parche para correcciones urgentes' }
 };
 
 /**
@@ -55,7 +27,7 @@ function getCurrentBranch() {
 }
 
 /**
- * Obtiene el último tag de la rama actual
+ * Obtiene el último tag
  */
 function getLatestTag() {
     try {
@@ -63,7 +35,6 @@ function getLatestTag() {
             .trim()
             .split('\n')
             .filter(tag => tag.length > 0);
-
         return tags.length > 0 ? tags[0] : null;
     } catch (error) {
         return null;
@@ -75,8 +46,7 @@ function getLatestTag() {
  */
 function extractBaseVersion(tag) {
     if (!tag) return '0.0.0';
-
-    // Remover prefijo y sufijos
+    
     let version = tag.replace(/^v/, '');
     version = version.replace(/-alpha\..*$/, '');
     version = version.replace(/-beta\..*$/, '');
@@ -84,12 +54,58 @@ function extractBaseVersion(tag) {
     version = version.replace(/-stable.*$/, '');
     version = version.replace(/-dev.*$/, '');
     version = version.replace(/\+.*$/, '');
-
+    
     return version;
 }
 
 /**
- * Genera el siguiente número de versión según la estrategia
+ * Verifica si el commit actual ya tiene un tag
+ */
+function hasTagForCurrentCommit() {
+    try {
+        const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+        const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
+            .trim()
+            .split('\n')
+            .filter(tag => tag.length > 0);
+        
+        return tagsForCommit.length > 0;
+    } catch (error) {
+        return false;
+    }
+}
+
+/**
+ * Detecta la estrategia basada en el nombre de la rama
+ */
+function detectStrategy(branchName) {
+    // Buscar coincidencias exactas
+    if (BRANCH_STRATEGIES[branchName]) {
+        return BRANCH_STRATEGIES[branchName];
+    }
+
+    // Buscar patrones
+    if (branchName.startsWith('feature/') || branchName.startsWith('fix/') || branchName.startsWith('skin/')) {
+        return BRANCH_STRATEGIES['feature'];
+    }
+    if (branchName.startsWith('hotfix/')) {
+        return BRANCH_STRATEGIES['hotfix'];
+    }
+    if (branchName.startsWith('release/')) {
+        return BRANCH_STRATEGIES['release'];
+    }
+
+    // Estrategia por defecto
+    return {
+        type: 'pre-release',
+        prefix: 'v',
+        suffix: '-dev',
+        description: 'Versión de desarrollo'
+    };
+}
+
+/**
+ * Genera la siguiente versión
  */
 function generateNextVersion(currentVersion, strategy, branchName) {
     const [major, minor, patch] = currentVersion.split('.').map(Number);
@@ -97,39 +113,22 @@ function generateNextVersion(currentVersion, strategy, branchName) {
     switch (strategy.type) {
         case 'stable':
             return `${major}.${minor}.${patch + 1}`;
-
+        
         case 'pre-release':
             if (branchName.startsWith('feature/') || branchName.startsWith('fix/') || branchName.startsWith('skin/')) {
-                // Para features, fixes y skins, mantener la misma versión minor (mismo release)
-                // Solo cambiar el número de feature en el sufijo
                 return `${major}.${minor}.${patch}`;
             }
-            // Para development, verificar si el merge viene de master
             if (branchName === 'development') {
-                // Verificar si el commit actual es un merge desde master
-                const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
-                const commitMessage = execSync(`git log -1 --pretty=format:"%s"`, { encoding: 'utf8' }).trim();
-
-                // Si es un merge desde master, incrementar major
-                if (commitMessage.includes('Merge branch \'main\'') ||
-                    commitMessage.includes('Merge branch \'master\'') ||
-                    commitMessage.includes('Merge remote-tracking branch')) {
-                    return `${major + 1}.0.0`;
-                }
-
-                // Para otros casos, mantener la versión actual
-                return `${major}.${minor}.${patch}`;
+                return `${major}.${minor + 1}.0`;
             }
-            // Para release, mantener la versión actual
             if (branchName.startsWith('release/')) {
                 return `${major}.${minor}.${patch}`;
             }
-            // Para otras ramas (fix, etc.), incrementar patch
             return `${major}.${minor}.${patch + 1}`;
-
+        
         case 'patch':
             return `${major}.${minor}.${patch + 1}`;
-
+        
         default:
             return `${major}.${minor}.${patch + 1}`;
     }
@@ -140,202 +139,30 @@ function generateNextVersion(currentVersion, strategy, branchName) {
  */
 function generateSuffix(strategy, branchName) {
     if (!strategy.suffix) return '';
-
+    
     const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-
-    // Para features, fixes y skins, usar formato simple con timestamp
+    
     if (branchName.startsWith('feature/') || branchName.startsWith('fix/') || branchName.startsWith('skin/')) {
-        // Verificar si ya existe un tag para esta rama
-        if (hasTagForCurrentBranch(branchName)) {
-            return null; // Indicar que no se debe crear un nuevo tag
-        }
-
         return `-alpha.${timestamp}`;
     }
-
-    // Para hotfix, verificar si ya existe un tag para esta rama
-    if (branchName.startsWith('hotfix/')) {
-        // Para hotfix, no usar sufijo (versión estable)
-        return '';
-    }
-
-    // Para release, agregar número de hotfix si es necesario
     if (branchName.startsWith('release/')) {
-        // Verificar si el commit actual ya tiene un tag RC
-        const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
-        const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
-            .trim()
-            .split('\n')
-            .filter(tag => tag.length > 0);
-
-        // Si ya hay un tag RC para este commit, no crear otro
-        const hasRCTag = tagsForCommit.some(tag => tag.includes('-rc.'));
-        if (hasRCTag) {
-            return null; // Indicar que no se debe crear un nuevo tag
-        }
-
-        // Si no hay tag RC, crear uno nuevo
         return `-rc.${timestamp}`;
     }
-
-    // Para development
     if (branchName === 'development') {
         return `-beta.${timestamp}`;
     }
-
+    
     return strategy.suffix;
 }
 
-
-
 /**
- * Detecta la estrategia basada en el nombre de la rama
- */
-function detectStrategy(branchName) {
-    // Buscar coincidencias exactas primero
-    if (BRANCH_STRATEGIES[branchName]) {
-        return BRANCH_STRATEGIES[branchName];
-    }
-
-    // Buscar patrones en el nombre de la rama
-    if (branchName.startsWith('feature/') || branchName.startsWith('fix/') || branchName.startsWith('skin/')) {
-        return BRANCH_STRATEGIES['feature'];
-    }
-
-    if (branchName.startsWith('hotfix/')) {
-        return BRANCH_STRATEGIES['hotfix'];
-    }
-
-    if (branchName.startsWith('release/')) {
-        return BRANCH_STRATEGIES['release'];
-    }
-
-    // Estrategia por defecto para ramas desconocidas
-    return {
-        type: 'pre-release',
-        prefix: 'v',
-        suffix: '-dev',
-        description: 'Versión de desarrollo'
-    };
-}
-
-/**
- * Verifica si ya existe un tag para la rama actual
- */
-function hasTagForCurrentBranch(branchName) {
-    try {
-        // Obtener todos los tags
-        const allTags = execSync('git tag --list "v*"', { encoding: 'utf8' })
-            .trim()
-            .split('\n')
-            .filter(tag => tag.length > 0);
-
-        // Para features, fixes y skins, verificar si ya existe un tag para esta rama específica
-        if (branchName.startsWith('feature/') || branchName.startsWith('fix/') || branchName.startsWith('skin/')) {
-            // Obtener la versión base del último tag 11
-            const latestTag = getLatestTag();
-            if (latestTag) {
-                const baseVersion = extractBaseVersion(latestTag);
-
-                // Buscar tags alpha que correspondan al release actual
-                const alphaTags = allTags.filter(tag =>
-                    tag.includes('-alpha.') &&
-                    tag.startsWith(`v${baseVersion}`)
-                );
-
-                // Si ya hay tags alpha para este release, asumir que esta feature ya tiene su tag
-                if (alphaTags.length > 0) {
-                    console.log(`⚠️  Ya existen tags alpha para el release ${baseVersion}: ${alphaTags.join(', ')}`);
-                    console.log(`💡 La rama ${branchName} ya tiene un tag asociado`);
-                    return true;
-                }
-
-                // Si no hay tags alpha para este release, permitir crear uno nuevo
-                return false;
-            }
-        }
-
-        // Para hotfix, verificar si ya existe un tag para esta rama
-        if (branchName.startsWith('hotfix/')) {
-            // Para hotfixes, permitir múltiples hotfixes secuenciales
-            // Solo verificar si el commit actual ya tiene un tag
-            const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
-            const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
-                .trim()
-                .split('\n')
-                .filter(tag => tag.length > 0);
-
-            if (tagsForCommit.length > 0) {
-                console.log(`⚠️  El commit actual ya tiene tags: ${tagsForCommit.join(', ')}`);
-                console.log(`💡 La rama ${branchName} ya tiene un tag asociado`);
-                return true;
-            }
-
-            // Si no hay tags para este commit, permitir crear un nuevo hotfix
-            return false;
-        }
-
-        // Para release, verificar si ya existe un tag RC para este commit
-        if (branchName.startsWith('release/')) {
-            const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
-            const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
-                .trim()
-                .split('\n')
-                .filter(tag => tag.length > 0);
-
-            // Solo bloquear si ya hay un tag RC para este commit
-            const hasRCTag = tagsForCommit.some(tag => tag.includes('-rc.'));
-            if (hasRCTag) {
-                console.log(`⚠️  El commit actual ya tiene un tag RC: ${tagsForCommit.find(tag => tag.includes('-rc.'))}`);
-                console.log(`💡 La rama ${branchName} ya tiene un tag RC asociado`);
-                return true;
-            }
-
-            // Si no hay tag RC, permitir crear uno nuevo
-            return false;
-        }
-
-        // Para development, verificar si ya existe un tag beta para este commit
-        if (branchName === 'development') {
-            const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
-            const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
-                .trim()
-                .split('\n')
-                .filter(tag => tag.length > 0);
-
-            // Solo bloquear si ya hay un tag beta para este commit
-            const hasBetaTag = tagsForCommit.some(tag => tag.includes('-beta.'));
-            if (hasBetaTag) {
-                console.log(`⚠️  El commit actual ya tiene un tag beta: ${tagsForCommit.find(tag => tag.includes('-beta.'))}`);
-                console.log(`💡 La rama ${branchName} ya tiene un tag beta asociado`);
-                return true;
-            }
-
-            // Si no hay tag beta, permitir crear uno nuevo (incluso si hay tag estable)
-            return false;
-        }
-
-        // Para otras ramas, verificar si hay tags que apunten al commit actual
-        const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
-        const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
-            .trim()
-            .split('\n')
-            .filter(tag => tag.length > 0);
-
-        return tagsForCommit.length > 0;
-    } catch (error) {
-        return false;
-    }
-}
-
-/**
- * Función principal de auto-tagging
+ * Función principal
  */
 function autoTag() {
     try {
         console.log('🤖 Auto-tagging por rama...\n');
 
-        // Verificar si estamos en un repositorio Git
+        // Verificar repositorio Git
         try {
             execSync('git rev-parse --git-dir', { stdio: 'pipe' });
         } catch (error) {
@@ -343,7 +170,7 @@ function autoTag() {
             process.exit(1);
         }
 
-        // Obtener información de la rama
+        // Obtener información
         const currentBranch = getCurrentBranch();
         const strategy = detectStrategy(currentBranch);
         const latestTag = getLatestTag();
@@ -354,27 +181,21 @@ function autoTag() {
         console.log(`🏷️  Último tag: ${latestTag || 'Ninguno'}`);
         console.log(`📊 Versión base: ${baseVersion}\n`);
 
-        // Generar nueva versión
-        const nextVersion = generateNextVersion(baseVersion, strategy, currentBranch);
-
-        // Debug: verificar si se está ejecutando hasTagForCurrentBranch
-        console.log(`🔍 Verificando si ya existe tag para rama: ${currentBranch}`);
-        const hasExistingTag = hasTagForCurrentBranch(currentBranch);
-        console.log(`🔍 Resultado de verificación: ${hasExistingTag}`);
-
-        // Verificar si ya existe un tag para esta rama
-        if (hasExistingTag) {
-            console.log('✅ Ya existe un tag para esta rama');
+        // Verificar si ya tiene tag
+        if (hasTagForCurrentCommit()) {
+            console.log('✅ El commit actual ya tiene un tag');
             console.log('💡 No se necesita crear un nuevo tag');
             return;
         }
 
+        // Generar nueva versión
+        const nextVersion = generateNextVersion(baseVersion, strategy, currentBranch);
         const suffix = generateSuffix(strategy, currentBranch);
         const newTag = `${strategy.prefix}${nextVersion}${suffix}`;
 
         console.log(`🎯 Nueva versión sugerida: ${newTag}`);
 
-        // Verificar si hay cambios sin commitear
+        // Verificar cambios sin commitear
         const status = execSync('git status --porcelain', { encoding: 'utf8' }).trim();
         if (status) {
             console.log('\n⚠️  Hay cambios sin commitear:');
@@ -394,15 +215,12 @@ function autoTag() {
 
             if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
                 try {
-                    // Crear el tag
                     console.log(`\n🏷️  Creando tag: ${newTag}`);
                     execSync(`git tag ${newTag}`, { stdio: 'inherit' });
 
-                    // Mostrar información del tag
                     const tagInfo = execSync(`git show ${newTag} --no-patch --format="%H"`, { encoding: 'utf8' }).trim();
                     console.log(`✅ Tag creado exitosamente en commit: ${tagInfo}`);
 
-                    // Preguntar si hacer push
                     const pushReadline = require('readline').createInterface({
                         input: process.stdin,
                         output: process.stdout
@@ -435,5 +253,5 @@ function autoTag() {
     }
 }
 
-// Ejecutar la función principal
+// Ejecutar
 autoTag();
