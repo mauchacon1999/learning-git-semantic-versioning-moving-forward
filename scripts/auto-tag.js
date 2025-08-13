@@ -158,20 +158,32 @@ function getFeatureNumberForRelease(branchName) {
     if (match) {
         const featureName = match[1];
 
-        // Obtener todas las features activas (que no han sido mergeadas a development)
+        // Obtener todos los tags existentes
         try {
-            const features = execSync('git branch --list "feature/*"', { encoding: 'utf8' })
+            const existingTags = execSync('git tag --list "v*"', { encoding: 'utf8' })
                 .trim()
                 .split('\n')
-                .filter(branch => branch.trim().length > 0)
-                .map(branch => branch.trim().replace('* ', ''));
+                .filter(tag => tag.length > 0);
 
-            // Ordenar alfabéticamente para mantener consistencia
-            features.sort();
+            // Obtener la versión base del último tag
+            const latestTag = getLatestTag();
+            if (latestTag) {
+                const baseVersion = extractBaseVersion(latestTag);
 
-            // Encontrar la posición de la feature actual
-            const currentFeatureIndex = features.indexOf(branchName);
-            return currentFeatureIndex >= 0 ? currentFeatureIndex + 1 : 1;
+                // Buscar tags alpha que correspondan al release actual
+                const alphaTags = existingTags.filter(tag =>
+                    tag.includes('-alpha.') &&
+                    tag.startsWith(`v${baseVersion}`)
+                );
+
+                // Si ya hay tags alpha, usar el siguiente número
+                if (alphaTags.length > 0) {
+                    return alphaTags.length + 1;
+                }
+            }
+
+            // Si no hay tags alpha para este release, empezar con 1
+            return 1;
         } catch (error) {
             return 1;
         }
@@ -236,7 +248,7 @@ function hasTagForCurrentBranch(branchName) {
             .split('\n')
             .filter(tag => tag.length > 0);
 
-        // Para features, verificar si ya existe un tag alpha para el release actual
+        // Para features, verificar si ya existe un tag para esta feature específica
         if (branchName.startsWith('feature/')) {
             // Obtener la versión base del último tag
             const latestTag = getLatestTag();
@@ -249,10 +261,24 @@ function hasTagForCurrentBranch(branchName) {
                     tag.startsWith(`v${baseVersion}`)
                 );
 
-                // Si ya hay tags alpha para este release, asumir que ya existe uno para esta feature
+                // Si ya hay tags alpha para este release, verificar si alguno corresponde a esta feature
                 if (alphaTags.length > 0) {
-                    console.log(`⚠️  Ya existen tags para el release ${baseVersion}: ${alphaTags.join(', ')}`);
-                    return true;
+                    // Obtener el número de feature actual
+                    const currentFeatureNumber = getFeatureNumberForRelease(branchName);
+
+                    // Verificar si ya existe un tag con este número de feature
+                    const existingTagForFeature = alphaTags.find(tag => {
+                        const match = tag.match(new RegExp(`-alpha\\.${currentFeatureNumber}\\.`));
+                        return match !== null;
+                    });
+
+                    if (existingTagForFeature) {
+                        console.log(`⚠️  Ya existe un tag para esta feature: ${existingTagForFeature}`);
+                        return true;
+                    }
+
+                    // Si no existe tag para esta feature específica, permitir crear uno nuevo
+                    return false;
                 }
             }
         }
@@ -299,14 +325,14 @@ function autoTag() {
         // Generar nueva versión
         const nextVersion = generateNextVersion(baseVersion, strategy, currentBranch);
         const suffix = generateSuffix(strategy, currentBranch);
-        
+
         // Verificar si ya existe un tag para esta rama
         if (suffix === null) {
             console.log('✅ Ya existe un tag para esta rama');
             console.log('💡 No se necesita crear un nuevo tag');
             return;
         }
-        
+
         const newTag = `${strategy.prefix}${nextVersion}${suffix}`;
 
         console.log(`🎯 Nueva versión sugerida: ${newTag}`);
