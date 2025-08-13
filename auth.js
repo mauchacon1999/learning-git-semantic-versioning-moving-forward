@@ -10,6 +10,13 @@ class UserAuth {
         this.roles = new Map();
         this.permissions = new Map();
 
+        // Inicializar roles
+        this.initializeRoles();
+        this.users = new Map();
+        this.sessions = new Map();
+        this.roles = new Map();
+        this.permissions = new Map();
+
         // Inicializar usuario admin
         this.users.set('admin', {
             id: '1',
