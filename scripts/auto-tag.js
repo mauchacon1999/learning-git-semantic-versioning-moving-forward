@@ -312,13 +312,13 @@ function hasTagForCurrentBranch(branchName) {
                 .trim()
                 .split('\n')
                 .filter(tag => tag.length > 0);
-            
+
             if (tagsForCommit.length > 0) {
                 console.log(`⚠️  El commit actual ya tiene tags: ${tagsForCommit.join(', ')}`);
                 console.log(`💡 La rama ${branchName} ya tiene un tag asociado`);
                 return true;
             }
-            
+
             // Si no hay tags para este commit, permitir crear un nuevo hotfix
             return false;
         }
@@ -340,6 +340,26 @@ function hasTagForCurrentBranch(branchName) {
             }
 
             // Si no hay tag RC, permitir crear uno nuevo
+            return false;
+        }
+
+        // Para development, verificar si ya existe un tag beta para este commit
+        if (branchName === 'development') {
+            const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
+            const tagsForCommit = execSync(`git tag --points-at ${currentCommit}`, { encoding: 'utf8' })
+                .trim()
+                .split('\n')
+                .filter(tag => tag.length > 0);
+
+            // Solo bloquear si ya hay un tag beta para este commit
+            const hasBetaTag = tagsForCommit.some(tag => tag.includes('-beta.'));
+            if (hasBetaTag) {
+                console.log(`⚠️  El commit actual ya tiene un tag beta: ${tagsForCommit.find(tag => tag.includes('-beta.'))}`);
+                console.log(`💡 La rama ${branchName} ya tiene un tag beta asociado`);
+                return true;
+            }
+
+            // Si no hay tag beta, permitir crear uno nuevo (incluso si hay tag estable)
             return false;
         }
 
