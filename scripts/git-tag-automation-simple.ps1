@@ -14,7 +14,10 @@ param(
     [switch]$DryRun,
     
     [Parameter(Mandatory=$false)]
-    [switch]$Force
+    [switch]$Force,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$AutoConfirm
 )
 
 # Configuracion
@@ -263,7 +266,7 @@ function Main {
     Write-ColorOutput "   Nueva version: $newVersion" "Success"
     Write-ColorOutput "   Rama: $currentBranch" "Info"
     
-    if (-not $DryRun) {
+    if (-not $DryRun -and -not $AutoConfirm) {
         $confirmation = Read-Host "`nDeseas continuar? (y/N)"
         if ($confirmation -ne "y" -and $confirmation -ne "Y") {
             Write-ColorOutput "Operacion cancelada por el usuario" "Warning"

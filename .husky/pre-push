@@ -1,5 +1,25 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🔍 Verificando tags de Git antes del push..."
-pnpm run verify-tags
+echo "🔍 Pre-push hook ejecutándose..."
+
+# Verificar que no haya cambios sin commitear
+if [ -n "$(git status --porcelain)" ]; then
+    echo "❌ Error: Hay cambios sin commitear"
+    echo "Por favor, haz commit de tus cambios antes de hacer push"
+    exit 1
+fi
+
+# Verificar que estés en una rama válida
+CURRENT_BRANCH=$(git branch --show-current)
+if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+    echo "⚠️  Advertencia: Estás haciendo push a $CURRENT_BRANCH"
+    echo "¿Estás seguro de que quieres continuar? (y/N)"
+    read -r response
+    if [ "$response" != "y" ] && [ "$response" != "Y" ]; then
+        echo "Push cancelado"
+        exit 1
+    fi
+fi
+
+echo "✅ Pre-push validaciones completadas"
