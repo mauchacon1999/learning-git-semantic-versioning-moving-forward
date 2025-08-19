@@ -3,15 +3,15 @@
 
 echo "🔄 Post-merge hook ejecutándose..."
 
-# Obtener la rama actual
-CURRENT_BRANCH=$(git branch --show-current)
+# Obtener la rama actual usando PowerShell
+CURRENT_BRANCH=$(powershell -Command "git branch --show-current")
 
 # Solo crear tags en development y master
 if [ "$CURRENT_BRANCH" = "development" ] || [ "$CURRENT_BRANCH" = "master" ]; then
     echo "📦 Rama: $CURRENT_BRANCH - Verificando si crear tag automático..."
     
-    # Contar commits desde el último tag
-    COMMITS_SINCE_LAST_TAG=$(git rev-list --count $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD)
+    # Contar commits desde el último tag usando PowerShell
+    COMMITS_SINCE_LAST_TAG=$(powershell -Command "git rev-list --count $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD")
     
     if [ "$COMMITS_SINCE_LAST_TAG" -gt 0 ]; then
         echo "🎯 Encontrados $COMMITS_SINCE_LAST_TAG commits nuevos"
@@ -20,8 +20,8 @@ if [ "$CURRENT_BRANCH" = "development" ] || [ "$CURRENT_BRANCH" = "master" ]; th
         if [ "$CURRENT_BRANCH" = "master" ]; then
             VERSION_TYPE="major"
         else
-            # En development, verificar si hay features o solo fixes
-            FEATURE_COMMITS=$(git log --oneline --since="1 day ago" | grep -c "feat:" || echo "0")
+            # En development, verificar si hay features usando PowerShell
+            FEATURE_COMMITS=$(powershell -Command "git log --oneline --since='1 day ago' | Select-String 'feat:' | Measure-Object | Select-Object -ExpandProperty Count")
             if [ "$FEATURE_COMMITS" -gt 0 ]; then
                 VERSION_TYPE="minor"
             else
