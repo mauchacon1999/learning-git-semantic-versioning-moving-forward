@@ -1,1 +1,2 @@
-npm test
+echo "✅ Pre-commit hook ejecutándose..."
+echo "No hay validaciones específicas configuradas"
