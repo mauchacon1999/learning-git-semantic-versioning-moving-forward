@@ -1,0 +1,66 @@
+{
+    "version": "1.0.0",
+    "description": "Configuración para scripts de automatización de tags Git",
+    "scripts": {
+        "git-tag-automation": {
+            "file": "git-tag-automation.ps1",
+            "description": "Script principal para crear tags automáticamente",
+            "defaultParams": {
+                "VersionType": "patch"
+            }
+        },
+        "get-version": {
+            "file": "get-version.ps1",
+            "description": "Script para obtener la versión actual",
+            "defaultParams": {}
+        },
+        "integrate-version": {
+            "file": "integrate-version.ps1",
+            "description": "Script para integrar versión en aplicaciones",
+            "defaultParams": {
+                "AppType": "web",
+                "OutputPath": "."
+            }
+        }
+    },
+    "files": {
+        "versionFile": "version.txt",
+        "changelogFile": "CHANGELOG.md",
+        "configFile": "version.json"
+    },
+    "versioning": {
+        "format": "semantic",
+        "prefix": "v",
+        "initialVersion": "1.0.0"
+    },
+    "git": {
+        "remote": "origin",
+        "defaultBranch": "main",
+        "protectedBranches": ["main", "master"]
+    },
+    "workflow": {
+        "development": {
+            "versionType": "patch",
+            "description": "Correcciones y mejoras menores"
+        },
+        "release": {
+            "versionType": "minor",
+            "description": "Nuevas funcionalidades"
+        },
+        "master": {
+            "versionType": "major",
+            "description": "Cambios breaking o releases importantes"
+        }
+    },
+    "validation": {
+        "checkGitStatus": true,
+        "checkTagExists": true,
+        "requireConfirmation": true,
+        "autoPush": true
+    },
+    "output": {
+        "colors": true,
+        "verbose": false,
+        "showSummary": true
+    }
+}
