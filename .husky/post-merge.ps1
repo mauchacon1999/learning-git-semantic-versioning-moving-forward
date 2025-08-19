@@ -5,9 +5,9 @@ Write-Host "Post-merge hook ejecutandose..." -ForegroundColor Cyan
 # Obtener la rama actual
 $CURRENT_BRANCH = git branch --show-current
 
-# Solo crear tags en development y master
-if ($CURRENT_BRANCH -eq "development" -or $CURRENT_BRANCH -eq "master") {
-    Write-Host "Rama: $CURRENT_BRANCH - Verificando si crear tag automatico..." -ForegroundColor Yellow
+# Solo crear tags cuando se crea una rama release
+if ($CURRENT_BRANCH -like "release/*") {
+    Write-Host "Rama: $CURRENT_BRANCH - Creando tag para release..." -ForegroundColor Yellow
     
     # Contar commits desde el ultimo tag
     $LAST_TAG = git describe --tags --abbrev=0 2>$null
@@ -20,24 +20,14 @@ if ($CURRENT_BRANCH -eq "development" -or $CURRENT_BRANCH -eq "master") {
     if ([int]$COMMITS_SINCE_LAST_TAG -gt 0) {
         Write-Host "Encontrados $COMMITS_SINCE_LAST_TAG commits nuevos" -ForegroundColor Green
         
-        # Determinar tipo de version basado en la rama y commits
-        if ($CURRENT_BRANCH -eq "master") {
-            $VERSION_TYPE = "major"
-        } else {
-            # En development, verificar si hay features o solo fixes
-            $FEATURE_COMMITS = git log --oneline --since="1 day ago" | Select-String "feat:" | Measure-Object | Select-Object -ExpandProperty Count
-            if ([int]$FEATURE_COMMITS -gt 0) {
-                $VERSION_TYPE = "minor"
-            } else {
-                $VERSION_TYPE = "patch"
-            }
-        }
+        # Para ramas release, siempre es minor (nuevas funcionalidades)
+        $VERSION_TYPE = "minor"
         
-        Write-Host "Creando tag automatico: $VERSION_TYPE" -ForegroundColor Magenta
+        Write-Host "Creando tag para release: $VERSION_TYPE" -ForegroundColor Magenta
         & powershell -ExecutionPolicy Bypass -File "scripts/git-tag-automation-simple.ps1" -VersionType $VERSION_TYPE -AutoConfirm
     } else {
         Write-Host "No hay commits nuevos para taggear" -ForegroundColor Green
     }
 } else {
-    Write-Host "Rama $CURRENT_BRANCH - No se crean tags automaticos" -ForegroundColor Gray
+    Write-Host "Rama $CURRENT_BRANCH - No se crean tags automaticos (solo en release)" -ForegroundColor Gray
 }

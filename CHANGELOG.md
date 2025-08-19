@@ -1,4 +1,11 @@
-﻿## [v1.2.0] - 2025-08-19
+﻿## [v1.3.0] - 2025-08-19
+
+### Cambios
+- 2c448bf feat: agregar configuraci├│n de notificaciones por email
+- fcdd2d4 feat: implementar sistema de notificaciones push
+- fb4dfcd chore: update CHANGELOG and version to v1.2.0, including new features and fixes
+
+## [v1.2.0] - 2025-08-19
 
 ### Cambios
 - 193cb2d fix: corregir mensajes en el hook post-merge para consistencia y claridad
@@ -18,6 +25,7 @@
 
 ### Cambios
 - 7bdef40 fix: update header title in cashier-ui.html to reflect new version
+
 
 
 
