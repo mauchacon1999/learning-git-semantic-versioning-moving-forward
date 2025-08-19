@@ -1,15 +1,15 @@
 #!/usr/bin/env pwsh
 
-Write-Host "🔄 Post-merge hook ejecutándose..." -ForegroundColor Cyan
+Write-Host "Post-merge hook ejecutandose..." -ForegroundColor Cyan
 
 # Obtener la rama actual
 $CURRENT_BRANCH = git branch --show-current
 
 # Solo crear tags en development y master
 if ($CURRENT_BRANCH -eq "development" -or $CURRENT_BRANCH -eq "master") {
-    Write-Host "📦 Rama: $CURRENT_BRANCH - Verificando si crear tag automático..." -ForegroundColor Yellow
+    Write-Host "Rama: $CURRENT_BRANCH - Verificando si crear tag automatico..." -ForegroundColor Yellow
     
-    # Contar commits desde el último tag
+    # Contar commits desde el ultimo tag
     $LAST_TAG = git describe --tags --abbrev=0 2>$null
     if ($LASTEXITCODE -ne 0) {
         $LAST_TAG = git rev-list --max-parents=0 HEAD
@@ -18,9 +18,9 @@ if ($CURRENT_BRANCH -eq "development" -or $CURRENT_BRANCH -eq "master") {
     $COMMITS_SINCE_LAST_TAG = git rev-list --count "$LAST_TAG..HEAD"
     
     if ([int]$COMMITS_SINCE_LAST_TAG -gt 0) {
-        Write-Host "🎯 Encontrados $COMMITS_SINCE_LAST_TAG commits nuevos" -ForegroundColor Green
+        Write-Host "Encontrados $COMMITS_SINCE_LAST_TAG commits nuevos" -ForegroundColor Green
         
-        # Determinar tipo de versión basado en la rama y commits
+        # Determinar tipo de version basado en la rama y commits
         if ($CURRENT_BRANCH -eq "master") {
             $VERSION_TYPE = "major"
         } else {
@@ -33,11 +33,11 @@ if ($CURRENT_BRANCH -eq "development" -or $CURRENT_BRANCH -eq "master") {
             }
         }
         
-        Write-Host "🏷️  Creando tag automático: $VERSION_TYPE" -ForegroundColor Magenta
+        Write-Host "Creando tag automatico: $VERSION_TYPE" -ForegroundColor Magenta
         & powershell -ExecutionPolicy Bypass -File "scripts/git-tag-automation-simple.ps1" -VersionType $VERSION_TYPE -AutoConfirm
     } else {
-        Write-Host "✅ No hay commits nuevos para taggear" -ForegroundColor Green
+        Write-Host "No hay commits nuevos para taggear" -ForegroundColor Green
     }
 } else {
-    Write-Host "⏭️  Rama $CURRENT_BRANCH - No se crean tags automáticos" -ForegroundColor Gray
+    Write-Host "Rama $CURRENT_BRANCH - No se crean tags automaticos" -ForegroundColor Gray
 }
