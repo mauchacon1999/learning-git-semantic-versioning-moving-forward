@@ -17,6 +17,7 @@
     "release:1.1.0": "semantic-release --release-as 1.1.0",
     "release:1.2.0": "semantic-release --release-as 1.2.0",
     "release:custom": "semantic-release --release-as",
-    "release:env": "semantic-release --release-as $env:RELEASE_VERSION"
+    "release:env": "semantic-release --release-as $env:RELEASE_VERSION",
+    "release:force": "semantic-release --release-as 1.1.0 --force"
   }
 }
