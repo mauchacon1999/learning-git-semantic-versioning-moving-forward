@@ -6,13 +6,16 @@
   },
   "scripts": {
     "prepare": "husky",
-    "release": "standard-version",
+    "check-tags": "node scripts/check-tags.js",
+    "release": "npm run check-tags && standard-version",
     "release:first": "standard-version --first-release",
-    "release:minor": "standard-version --release-as minor",
-    "release:major": "standard-version --release-as major",
-    "release:patch": "standard-version --release-as patch",
-    "release:alpha": "standard-version --prerelease alpha",
-    "release:beta": "standard-version --prerelease beta",
-    "release:rc": "standard-version --prerelease rc"
+    "release:minor": "npm run check-tags && standard-version --release-as minor",
+    "release:major": "npm run check-tags && standard-version --release-as major",
+    "release:patch": "npm run check-tags && standard-version --release-as patch",
+    "release:alpha": "npm run check-tags && standard-version --prerelease alpha",
+    "release:beta": "npm run check-tags && standard-version --prerelease beta",
+    "release:rc": "npm run check-tags && standard-version --prerelease rc",
+    "release:force": "standard-version",
+    "cleanup:tags": "node scripts/cleanup-tags.js"
   }
 }
