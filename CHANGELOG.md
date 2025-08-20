@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/compare/v1.0.4...v1.0.5) (2025-08-20)
+
+
+### Bug Fixes
+
+* add initialization check and duplicate widget validation to dashboard ([a4a1711](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/a4a17111c9a0ea4c415abfc8abfe0eaf35da3d79))
+
 ## [1.0.4](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/compare/v1.0.3...v1.0.4) (2025-08-20)
 
 
