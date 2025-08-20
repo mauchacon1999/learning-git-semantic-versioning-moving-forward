@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/compare/v1.0.0...v1.0.1) (2025-08-20)
+
+
+### Features
+
+* add notification service with real-time notifications ([72533d7](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/72533d7a7604a18e7f73f72cd5ebb42952ca114f))
+
 # 1.0.0 (2025-08-20)
 
 
