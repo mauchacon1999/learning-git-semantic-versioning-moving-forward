@@ -56,6 +56,54 @@ class GitFlowAutomation {
         }
     }
 
+    // 🛡️ NUEVO: Verificar si un tag ya existe
+    tagExists(tagName) {
+        try {
+            execSync(`git rev-parse v${tagName}`, {
+                encoding: 'utf8',
+                stdio: 'pipe'
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    // 🛡️ NUEVO: Generar tag único con timestamp
+    generateUniqueTag(baseVersion, type) {
+        const timestamp = Date.now();
+        const randomSuffix = Math.floor(Math.random() * 1000);
+        return `${baseVersion}-${type}.${timestamp}.${randomSuffix}`;
+    }
+
+    // 🛡️ NUEVO: Verificar y crear tag único
+    createUniqueTag(baseVersion, type, description) {
+        let attempt = 1;
+        let tagName;
+
+        do {
+            if (attempt === 1) {
+                tagName = `${baseVersion}-${type}.${Date.now()}`;
+            } else {
+                tagName = this.generateUniqueTag(baseVersion, type);
+            }
+
+            console.log(`🏷️  Attempt ${attempt}: Creating tag v${tagName}`);
+
+            if (!this.tagExists(tagName)) {
+                console.log(`✅ Tag v${tagName} is unique - proceeding`);
+                this.executeCommand(`yarn release:${type} --release-as ${tagName}`);
+                return tagName;
+            } else {
+                console.log(`⚠️  Tag v${tagName} already exists - trying again`);
+                attempt++;
+            }
+        } while (attempt <= 3);
+
+        console.error(`❌ Failed to create unique tag after ${attempt} attempts`);
+        process.exit(1);
+    }
+
     getNextVersion(type, currentVersion = this.currentVersion) {
         const [major, minor, patch] = currentVersion.split('.').map(Number);
 
@@ -155,41 +203,47 @@ class GitFlowAutomation {
         }
     }
 
-    // Tag creation methods
+    // Tag creation methods con prevención de duplicados
     createAlphaTag() {
         const nextMinor = this.getNextVersion('minor');
-        const alphaVersion = `${nextMinor}-alpha.${Date.now()}`;
-
-        console.log(`🏷️  Creating alpha tag: v${alphaVersion}`);
-        this.executeCommand(`yarn release:alpha --release-as ${alphaVersion}`);
+        console.log(`🏷️  Creating alpha tag for version ${nextMinor}`);
+        this.createUniqueTag(nextMinor, 'alpha', 'Alpha release for development');
     }
 
     createBetaTag(version) {
-        const betaVersion = `${version}-beta.${Date.now()}`;
-
-        console.log(`🏷️  Creating beta tag: v${betaVersion}`);
-        this.executeCommand(`yarn release:beta --release-as ${betaVersion}`);
+        console.log(`🏷️  Creating beta tag for version ${version}`);
+        this.createUniqueTag(version, 'beta', 'Beta release for QA');
     }
 
     createRCTag() {
         const nextPatch = this.getNextVersion('patch');
-        const rcVersion = `${nextPatch}-rc.${Date.now()}`;
-
-        console.log(`🏷️  Creating RC tag: v${rcVersion}`);
-        this.executeCommand(`yarn release:rc --release-as ${rcVersion}`);
+        console.log(`🏷️  Creating RC tag for version ${nextPatch}`);
+        this.createUniqueTag(nextPatch, 'rc', 'Release candidate');
     }
 
     createPatchTag() {
         const nextPatch = this.getNextVersion('patch');
-
         console.log(`🏷️  Creating patch tag: v${nextPatch}`);
+
+        // Para tags finales, verificar si ya existe
+        if (this.tagExists(nextPatch)) {
+            console.log(`⚠️  Tag v${nextPatch} already exists - skipping`);
+            return;
+        }
+
         this.executeCommand(`yarn release:patch --release-as ${nextPatch}`);
     }
 
     createFinalTag() {
         const nextMinor = this.getNextVersion('minor');
-
         console.log(`🏷️  Creating final release tag: v${nextMinor}`);
+
+        // Para tags finales, verificar si ya existe
+        if (this.tagExists(nextMinor)) {
+            console.log(`⚠️  Tag v${nextMinor} already exists - skipping`);
+            return;
+        }
+
         this.executeCommand(`yarn release:minor --release-as ${nextMinor}`);
     }
 
