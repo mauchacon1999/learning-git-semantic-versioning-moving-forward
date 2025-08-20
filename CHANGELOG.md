@@ -1,3 +1,15 @@
+## [1.0.3](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/compare/v1.0.2...v1.0.3) (2025-08-20)
+
+
+### Bug Fixes
+
+* improve authentication security with input validation and account lockout ([b5b89f5](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/b5b89f58ba94055c3e2f58db784cf347f594fd82))
+
+
+### Features
+
+* add report service with PDF export functionality ([bc091cf](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/bc091cfd8f50fa1bd7ccfe452116f45a933294d1))
+
 ## [1.0.2](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/compare/v1.0.1...v1.0.2) (2025-08-20)
 
 
