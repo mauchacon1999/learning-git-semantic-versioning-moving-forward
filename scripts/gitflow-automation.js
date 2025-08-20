@@ -80,26 +80,27 @@ class GitFlowAutomation {
     createUniqueTag(baseVersion, type, description) {
         let attempt = 1;
         let tagName;
-
+        
         do {
             if (attempt === 1) {
                 tagName = `${baseVersion}-${type}.${Date.now()}`;
             } else {
                 tagName = this.generateUniqueTag(baseVersion, type);
             }
-
+            
             console.log(`🏷️  Attempt ${attempt}: Creating tag v${tagName}`);
-
+            
             if (!this.tagExists(tagName)) {
                 console.log(`✅ Tag v${tagName} is unique - proceeding`);
-                this.executeCommand(`yarn release:${type} --release-as ${tagName}`);
+                // Usar standard-version directamente sin --release-as para evitar el problema de vnull
+                this.executeCommand(`yarn release:${type}`);
                 return tagName;
             } else {
                 console.log(`⚠️  Tag v${tagName} already exists - trying again`);
                 attempt++;
             }
         } while (attempt <= 3);
-
+        
         console.error(`❌ Failed to create unique tag after ${attempt} attempts`);
         process.exit(1);
     }
