@@ -7,6 +7,7 @@ class AuthService {
     login(username, password) {
         // Simular login
         // Validaciones rc
+        // Validaciones beta
         if (username && password) {
             this.isAuthenticated = true;
             return true;
