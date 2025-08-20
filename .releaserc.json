@@ -55,6 +55,14 @@
     {
       "type": "BREAKING CHANGE",
       "release": "major"
+    },
+    {
+      "type": "release",
+      "release": "minor"
+    },
+    {
+      "type": "hotfix",
+      "release": "patch"
     }
   ],
   "parserOpts": {

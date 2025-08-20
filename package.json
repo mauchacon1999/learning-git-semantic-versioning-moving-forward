@@ -13,6 +13,8 @@
     "release": "semantic-release",
     "release:dry-run": "semantic-release --dry-run",
     "release:debug": "DEBUG=semantic-release:* semantic-release",
-    "release:minor": "semantic-release --release-as minor"
+    "release:minor": "semantic-release --release-as minor",
+    "release:custom": "semantic-release --release-as"
+     
   }
 }
