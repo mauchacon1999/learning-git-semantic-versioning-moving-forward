@@ -1,3 +1,17 @@
+## [1.0.4](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/compare/v1.0.3...v1.0.4) (2025-08-20)
+
+
+### Bug Fixes
+
+* add validation and limits to dashboard widget management ([5b6baf1](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/5b6baf1b429c42dd2777687bd2e78f88ca96c298))
+
+
+### Features
+
+* add auto-refresh functionality to dashboard ([5c77571](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/5c775719fb6656714da49d2af6b5f6764bf6ece1))
+* add dashboard service with widget management ([d9838ac](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/d9838ac4d5b519bad6d14892d5da9cd40c283cd8))
+* add theme and layout management to dashboard ([f15449d](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/f15449d0a7b3b96083e08fed5b8235384f323cdc))
+
 ## [1.0.3](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/compare/v1.0.2...v1.0.3) (2025-08-20)
 
 
