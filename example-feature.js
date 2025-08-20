@@ -6,6 +6,7 @@ class AuthService {
 
     login(username, password) {
         // Simular login
+        // Validaciones rc
         if (username && password) {
             this.isAuthenticated = true;
             return true;
