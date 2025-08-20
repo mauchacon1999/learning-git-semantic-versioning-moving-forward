@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔄 Post-merge hook triggered"
+echo "📍 Current branch: $(git branch --show-current)"
+
+# Run GitFlow automation based on branch
+CURRENT_BRANCH=$(git branch --show-current)
+
+if [ "$CURRENT_BRANCH" = "development" ]; then
+    echo "🔄 Development branch - running merge automation"
+    yarn gitflow:merge
+elif [ "$CURRENT_BRANCH" = "master" ]; then
+    echo "🔄 Master branch - running merge automation"
+    yarn gitflow:merge
+fi

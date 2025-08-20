@@ -1,25 +1,19 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🔍 Pre-push hook ejecutándose..."
+echo "🚀 Pre-push hook triggered"
+echo "📍 Current branch: $(git branch --show-current)"
 
-# Verificar que no haya cambios sin commitear
-if [ -n "$(git status --porcelain)" ]; then
-    echo "❌ Error: Hay cambios sin commitear"
-    echo "Por favor, haz commit de tus cambios antes de hacer push"
-    exit 1
-fi
-
-# Verificar que estés en una rama válida
+# Run GitFlow automation based on branch type
 CURRENT_BRANCH=$(git branch --show-current)
-if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
-    echo "⚠️  Advertencia: Estás haciendo push a $CURRENT_BRANCH"
-    echo "¿Estás seguro de que quieres continuar? (y/N)"
-    read -r response
-    if [ "$response" != "y" ] && [ "$response" != "Y" ]; then
-        echo "Push cancelado"
-        exit 1
-    fi
-fi
 
-echo "✅ Pre-push validaciones completadas"
+if [[ "$CURRENT_BRANCH" == feature/* ]] || [[ "$CURRENT_BRANCH" == fix/* ]] || [[ "$CURRENT_BRANCH" == update/* ]]; then
+    echo "🔄 Feature branch - running feature automation"
+    yarn gitflow:feature
+elif [[ "$CURRENT_BRANCH" == release/* ]]; then
+    echo "🔄 Release branch - running release automation"
+    yarn gitflow:release
+elif [[ "$CURRENT_BRANCH" == hotfix/* ]]; then
+    echo "🔄 Hotfix branch - running hotfix automation"
+    yarn gitflow:hotfix
+fi

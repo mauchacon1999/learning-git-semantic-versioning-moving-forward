@@ -1,281 +1,228 @@
-# 🚀 Git Tag Automation Scripts
+# 🚀 GitFlow Automation System
 
-Scripts de automatización para el manejo de tags de Git con versionado semántico, diseñados para flujos de trabajo Git Flow.
+Sistema de automatización completo para GitFlow con versionado semántico automático.
 
-## 📋 Scripts Disponibles
+## 📋 Flujo de Trabajo
 
-### 1. `git-tag-automation.ps1`
-
-Script principal para crear tags automáticamente con versionado semántico.
-
-### 2. `get-version.ps1`
-
-Script para obtener la versión actual de la aplicación.
-
-## 🎯 Características Principales
-
-- ✅ **Versionado Semántico**: Sigue el estándar MAJOR.MINOR.PATCH
-- ✅ **Validación de Tags**: Verifica que el tag no exista antes de crearlo
-- ✅ **Detección Automática**: Encuentra el último tag y genera el siguiente
-- ✅ **Archivo de Versión**: Crea/actualiza `version.txt` para uso en la aplicación
-- ✅ **Changelog Automático**: Genera entradas en `CHANGELOG.md`
-- ✅ **Validaciones**: Verifica estado del repositorio antes de crear tags
-- ✅ **Modo Dry Run**: Permite simular la operación sin hacer cambios
-- ✅ **Output Coloreado**: Interfaz visual clara y profesional
-
-## 🛠️ Uso del Script Principal
-
-### Sintaxis Básica
-
-```powershell
-.\scripts\git-tag-automation.ps1 [Parámetros]
-```
-
-### Parámetros Disponibles
-
-| Parámetro        | Descripción                             | Valores                   | Default  |
-| ---------------- | --------------------------------------- | ------------------------- | -------- |
-| `-VersionType`   | Tipo de incremento de versión           | `patch`, `minor`, `major` | `patch`  |
-| `-CustomVersion` | Versión personalizada                   | `X.Y.Z` o `vX.Y.Z`        | -        |
-| `-DryRun`        | Simular operación sin cambios           | Switch                    | `$false` |
-| `-Force`         | Forzar ejecución con cambios pendientes | Switch                    | `$false` |
-
-### Ejemplos de Uso
-
-#### 1. Crear un tag con incremento patch (default)
-
-```powershell
-.\scripts\git-tag-automation.ps1
-```
-
-**Resultado**: Si el último tag es `v1.2.3`, crea `v1.2.4`
-
-#### 2. Crear un tag con incremento minor
-
-```powershell
-.\scripts\git-tag-automation.ps1 -VersionType minor
-```
-
-**Resultado**: Si el último tag es `v1.2.3`, crea `v1.3.0`
-
-#### 3. Crear un tag con incremento major
-
-```powershell
-.\scripts\git-tag-automation.ps1 -VersionType major
-```
-
-**Resultado**: Si el último tag es `v1.2.3`, crea `v2.0.0`
-
-#### 4. Crear una versión personalizada
-
-```powershell
-.\scripts\git-tag-automation.ps1 -CustomVersion "1.5.0"
-```
-
-**Resultado**: Crea el tag `v1.5.0`
-
-#### 5. Simular la operación (Dry Run)
-
-```powershell
-.\scripts\git-tag-automation.ps1 -DryRun
-```
-
-**Resultado**: Muestra qué se haría sin ejecutar cambios
-
-#### 6. Forzar ejecución con cambios pendientes
-
-```powershell
-.\scripts\git-tag-automation.ps1 -Force
-```
-
-**Resultado**: Ejecuta aunque haya cambios sin commitear
-
-## 🔍 Uso del Script de Versión
-
-### Sintaxis Básica
-
-```powershell
-.\scripts\get-version.ps1 [Parámetros]
-```
-
-### Parámetros Disponibles
-
-| Parámetro      | Descripción                         |
-| -------------- | ----------------------------------- |
-| `-Json`        | Mostrar información en formato JSON |
-| `-OnlyVersion` | Mostrar solo el número de versión   |
-| `-Verbose`     | Mostrar información detallada       |
-
-### Ejemplos de Uso
-
-#### 1. Obtener versión actual
-
-```powershell
-.\scripts\get-version.ps1
-```
-
-**Resultado**: `🏷️  Versión actual: 1.2.3`
-
-#### 2. Solo el número de versión
-
-```powershell
-.\scripts\get-version.ps1 -OnlyVersion
-```
-
-**Resultado**: `1.2.3`
-
-#### 3. Información detallada
-
-```powershell
-.\scripts\get-version.ps1 -Verbose
-```
-
-**Resultado**: Muestra versión, rama, commit, fecha, etc.
-
-#### 4. Formato JSON
-
-```powershell
-.\scripts\get-version.ps1 -Json
-```
-
-**Resultado**: JSON con toda la información de versión
-
-## 📁 Archivos Generados
-
-### `version.txt`
-
-Contiene solo el número de versión (sin el prefijo 'v'):
+### 1. **Feature Branches** → `development`
 
 ```
-1.2.3
+add/forms-deposit → development
+add/button-deposit → development
+fix/color-deposit → development
 ```
 
-### `CHANGELOG.md`
-
-Archivo de cambios automático:
-
-```markdown
-## [v1.2.3] - 2024-01-15
-
-### Cambios
-
-- add/forms-deposit: Agregar formularios de depósito
-- add/button-deposit: Implementar botón de depósito
-- fix/color-deposit: Corregir colores del módulo de depósito
-
-## [v1.2.2] - 2024-01-10
-
-### Cambios
-
-- add/certificates: Agregar módulo de certificados
-```
-
-## 🔄 Flujo de Trabajo Recomendado
-
-### 1. Desarrollo Normal (Patch)
-
-```powershell
-# Después de completar fixes en development
-.\scripts\git-tag-automation.ps1 -VersionType patch
-```
-
-### 2. Nuevas Funcionalidades (Minor)
-
-```powershell
-# Después de completar features en development
-.\scripts\git-tag-automation.ps1 -VersionType minor
-```
-
-### 3. Cambios Breaking (Major)
-
-```powershell
-# Después de cambios que rompen compatibilidad
-.\scripts\git-tag-automation.ps1 -VersionType major
-```
-
-### 4. Hotfixes
-
-```powershell
-# Para correcciones urgentes en master
-.\scripts\git-tag-automation.ps1 -VersionType patch -Force
-```
-
-## ⚠️ Validaciones del Script
-
-### Antes de Crear un Tag
-
-1. ✅ Verifica que esté en un repositorio Git
-2. ✅ Verifica que no haya cambios sin commitear (a menos que use `-Force`)
-3. ✅ Verifica que el tag no exista ya
-4. ✅ Valida el formato de versión personalizada
-
-### Después de Crear un Tag
-
-1. ✅ Crea/actualiza `version.txt`
-2. ✅ Genera entrada en `CHANGELOG.md`
-3. ✅ Hace push del tag al repositorio remoto
-4. ✅ Muestra resumen de la operación
-
-## 🎨 Integración con tu Flujo Actual
-
-### Tu Flujo:
+### 2. **Release Branch** → QA
 
 ```
-development → release → master
-     ↓           ↓        ↓
-   patch     minor    major
+release/1.1.0 → QA testing (1-2 semanas)
 ```
 
-### Uso Recomendado:
+### 3. **Hotfixes** → Release o Master
 
-- **En development**: `-VersionType patch` (correcciones)
-- **En release**: `-VersionType minor` (nuevas features)
-- **En master**: `-VersionType major` (cambios breaking)
-
-## 🚨 Casos de Error Comunes
-
-### 1. "No se encontró un repositorio Git"
-
-**Solución**: Ejecutar desde el directorio raíz del proyecto
-
-### 2. "Hay cambios sin commitear"
-
-**Solución**:
-
-```powershell
-git add .
-git commit -m "feat: preparar release"
-.\scripts\git-tag-automation.ps1
+```
+hotfix/styles-deposit → release/1.1.0
+hotfix/critical-bug → master
 ```
 
-### 3. "El tag ya existe"
+### 4. **Final Release** → Master
 
-**Solución**: Usar un tipo de incremento diferente o versión personalizada
-
-### 4. "Error al enviar el tag"
-
-**Solución**: Verificar conexión a internet y permisos del repositorio
-
-## 🔧 Personalización
-
-### Cambiar Archivos de Configuración
-
-Edita las variables al inicio de los scripts:
-
-```powershell
-$VERSION_FILE = "version.txt"        # Archivo de versión
-$CHANGELOG_FILE = "CHANGELOG.md"     # Archivo de changelog
+```
+release/1.1.0 → master (después de QA)
 ```
 
-### Agregar Validaciones Personalizadas
+## 🏷️ Sistema de Tags Automáticos
 
-Puedes agregar funciones de validación en la función `Main()` del script principal.
+### **Development (Alpha)**
+
+- **Trigger:** Merge de features a development
+- **Formato:** `v1.1.0-alpha.1234567890`
+- **Ejemplo:** `v1.1.0-alpha.1703123456789`
+
+### **Release (Beta)**
+
+- **Trigger:** Creación de release branch
+- **Formato:** `v1.1.0-beta.1234567890`
+- **Ejemplo:** `v1.1.0-beta.1703123456789`
+
+### **Hotfix en Release (RC)**
+
+- **Trigger:** Commit en hotfix branch
+- **Formato:** `v1.1.1-rc.1234567890`
+- **Ejemplo:** `v1.1.1-rc.1703123456789`
+
+### **Hotfix en Master (Patch)**
+
+- **Trigger:** Commit en hotfix branch
+- **Formato:** `v1.1.1`
+- **Ejemplo:** `v1.1.1`
+
+### **Final Release (Minor)**
+
+- **Trigger:** Merge de release a master
+- **Formato:** `v1.1.0`
+- **Ejemplo:** `v1.1.0`
+
+## 🛠️ Comandos Disponibles
+
+### **Scripts de Release**
+
+```bash
+yarn release              # Release automático
+yarn release:first        # Primera versión
+yarn release:minor        # Incrementar minor
+yarn release:major        # Incrementar major
+yarn release:patch        # Incrementar patch
+yarn release:alpha        # Pre-release alpha
+yarn release:beta         # Pre-release beta
+yarn release:rc           # Pre-release RC
+```
+
+### **Scripts de GitFlow**
+
+```bash
+yarn gitflow:feature      # Automatización de features
+yarn gitflow:release      # Automatización de releases
+yarn gitflow:hotfix       # Automatización de hotfixes
+yarn gitflow:merge        # Automatización de merges
+```
+
+## 🔧 Configuración de Hooks
+
+### **Hooks Automáticos**
+
+- **post-merge:** Se ejecuta después de merge a development/master
+- **pre-push:** Se ejecuta antes de push en feature/release/hotfix
+- **post-commit:** Se ejecuta después de commit en release/hotfix
+
+### **Configurar Hooks**
+
+```bash
+node scripts/setup-hooks.js
+```
+
+## 📝 Convenciones de Commits
+
+### **Tipos de Commits**
+
+- `feat:` ✨ Nuevas características
+- `fix:` 🐛 Correcciones de bugs
+- `docs:` 📚 Documentación
+- `style:` 💄 Cambios de estilo
+- `refactor:` ♻️ Refactorización
+- `perf:` ⚡ Mejoras de rendimiento
+- `test:` 🧪 Tests
+- `chore:` 🔧 Tareas de mantenimiento
+
+### **Ejemplos**
+
+```bash
+git commit -m "feat: agregar formulario de depósito"
+git commit -m "fix: corregir validación de email"
+git commit -m "docs: actualizar README"
+```
+
+## 🎯 Ejemplo Práctico
+
+### **1. Desarrollo de Features**
+
+```bash
+# Crear feature branch
+git checkout -b add/forms-deposit
+# Hacer cambios y commits
+git commit -m "feat: agregar formulario de depósito"
+git commit -m "feat: agregar validaciones"
+# Merge a development
+git checkout development
+git merge add/forms-deposit
+# ✅ Se crea automáticamente: v1.1.0-alpha.1234567890
+```
+
+### **2. Crear Release**
+
+```bash
+# Crear release branch
+git checkout -b release/1.1.0
+# ✅ Se crea automáticamente: v1.1.0-beta.1234567890
+```
+
+### **3. Hotfix durante QA**
+
+```bash
+# Crear hotfix branch
+git checkout -b hotfix/styles-deposit
+# Hacer cambios
+git commit -m "fix: corregir estilos del formulario"
+# ✅ Se crea automáticamente: v1.1.1-rc.1234567890
+```
+
+### **4. Final Release**
+
+```bash
+# Merge a master
+git checkout master
+git merge release/1.1.0
+# ✅ Se crea automáticamente: v1.1.0
+```
+
+## 🔍 Monitoreo
+
+### **Ver Tags Creados**
+
+```bash
+git tag --sort=-version:refname
+```
+
+### **Ver Changelog**
+
+```bash
+cat CHANGELOG.md
+```
+
+### **Ver Estado Actual**
+
+```bash
+git status
+git branch -a
+```
+
+## ⚠️ Consideraciones
+
+1. **Siempre usar commits convencionales** para que el changelog se genere correctamente
+2. **Los hooks se ejecutan automáticamente** - no necesitas ejecutar comandos manualmente
+3. **Los tags se crean con timestamps** para evitar duplicados
+4. **El sistema detecta el tipo de branch** automáticamente
+5. **Los hotfixes incrementan patch** automáticamente
+
+## 🚨 Troubleshooting
+
+### **Error: "standard-version not found"**
+
+```bash
+yarn add --dev standard-version
+```
+
+### **Error: "Husky hooks not working"**
+
+```bash
+yarn prepare
+node scripts/setup-hooks.js
+```
+
+### **Error: "Invalid version"**
+
+Verificar que `package.json` tenga campo `version`:
+
+```json
+{
+  "version": "1.0.0"
+}
+```
 
 ## 📞 Soporte
 
-Para reportar bugs o solicitar nuevas características, contacta al equipo de desarrollo.
+Para problemas o preguntas sobre el sistema de automatización, revisar:
 
----
-
-**Versión del Script**: 1.0.0  
-**Última Actualización**: Enero 2024
+1. Logs de los hooks en `.husky/`
+2. Output de los comandos de GitFlow
+3. Estado del `package.json` y `CHANGELOG.md`
