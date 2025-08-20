@@ -1,8 +1,25 @@
 {
+  "version": "1.0.0",
   "devDependencies": {
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "standard-version": "^9.5.0"
   },
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "release": "standard-version",
+    "release:first": "standard-version --first-release",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
+    "release:patch": "standard-version --release-as patch",
+    "release:prerelease": "standard-version --prerelease",
+    "release:alpha": "standard-version --prerelease alpha",
+    "release:beta": "standard-version --prerelease beta",
+    "release:rc": "standard-version --prerelease rc",
+    "gitflow:feature": "node scripts/gitflow-automation.js feature",
+    "gitflow:release": "node scripts/gitflow-automation.js release",
+    "gitflow:hotfix": "node scripts/gitflow-automation.js hotfix",
+    "gitflow:merge": "node scripts/gitflow-automation.js merge",
+    "demo": "node scripts/demo-workflow.js",
+    "setup:hooks": "node scripts/setup-hooks.js"
   }
 }

@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "💾 Post-commit hook triggered"
+echo "📍 Current branch: $(git branch --show-current)"
+
+# Only run for specific branch types
+CURRENT_BRANCH=$(git branch --show-current)
+
+if [[ "$CURRENT_BRANCH" == release/* ]]; then
+    echo "🔄 Release branch commit - running release automation"
+    yarn gitflow:release
+elif [[ "$CURRENT_BRANCH" == hotfix/* ]]; then
+    echo "🔄 Hotfix branch commit - running hotfix automation"
+    yarn gitflow:hotfix
+fi
