@@ -14,7 +14,9 @@
     "release:dry-run": "semantic-release --dry-run",
     "release:debug": "DEBUG=semantic-release:* semantic-release",
     "release:minor": "semantic-release --release-as minor",
-    "release:custom": "semantic-release --release-as"
-     
+    "release:1.1.0": "semantic-release --release-as 1.1.0",
+    "release:1.2.0": "semantic-release --release-as 1.2.0",
+    "release:custom": "semantic-release --release-as",
+    "release:env": "semantic-release --release-as $env:RELEASE_VERSION"
   }
 }
