@@ -278,6 +278,62 @@ All notable changes to this project will be documented in this file. See [standa
 * update hotfix tag verification logic to allow only one tag per branch and improve version tag checks ([54c65f6](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/54c65f6e2725bb16e9365e61197da20a64ea1991))
 * update versioning logic for development branch to increment minor version after merging features ([a24406f](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/a24406f0482bd57c0825a6bf472003454254018b))
 
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+##  (2025-08-20)
+
+
+### Features
+
+* add automated branch-based tagging system with GitFlow support ([9d7fecb](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/9d7fecba5a2687c6ddc5a1a931c9612c32e7c95d))
+* add default admin user to authentication system ([4efbc6a](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/4efbc6a7589236e546e765f823030796cc032518))
+* add function to check for existing tags for the current branch in auto-tag.js ([57d18d4](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/57d18d46e407d2346519c5f9ad0f069f7a22bff1))
+* add hotfix tag verification to prevent duplicate tags for existing hotfix branches ([27326aa](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/27326aaffbd6784b7c14fb770c895fedb1047240))
+* add initial project setup with Git semantic versioning tools and Husky integration ([9cf3cc9](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/9cf3cc9964d774658642b55ad216c402a592e268))
+* add logic to check for existing beta tags on the development branch before allowing new tags ([ee2f615](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/ee2f615cce9a02d691f52ef111db4d4b49e3f3d3))
+* add logic to prevent creation of duplicate RC tags for release branches and improve tag verification ([f7700fb](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/f7700fb5c1bffdf948864ad7cedbf131ac12b446))
+* agregar configuración de notificaciones por email ([2c448bf](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/2c448bf32fb2e4a2a1c01a0d7e3d8421da6a4e20))
+* agregar estilos y formulario para módulo de depósito ([8f0dad4](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/8f0dad4dc2941bc63472f8d5edd397ccfda01d99))
+* agregar hook post-merge para creación automática de tags en ramas development y master ([1371be5](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/1371be5faf1bbfe997785c04c59a79eb6cd43302))
+* agregar hooks de Husky para automatización de tags ([dcefe64](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/dcefe6400ebdf17608f98d64b8c02a43079198ac))
+* agregar validación de contraseñas seguras ([5191464](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/5191464a023b2e4d88ac64c37e4c27abb56caeca))
+* agregar validación de formularios de login ([7f2333e](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/7f2333e78b42b1e15d54eaa35ea5f84d783387ae))
+* detectar merge desde master para incrementar versión major en development ([6f2260a](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/6f2260a2e4d5a113be37d8e3d5390d44a62e2099))
+* enhance auto-tag.js to prevent duplicate tags for existing branches ([ebfc51f](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/ebfc51f0cb18bc5afd5f0bbe329b7a373ea3d71d))
+* enhance hotfix handling in auto-tag.js to prevent duplicate tags and improve logging ([9f56166](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/9f56166ddf70d0ad4b9bada2a9975578b7eba37d))
+* enhance user authentication with improved security measures and session management ([1740c37](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/1740c3736edc6aa7c89a32ff4b81737f5c113d0b))
+* implement cashier system with user authentication, transaction handling, and UI for deposits and withdrawals ([0bdef17](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/0bdef175586ddcb1ec79cde22d750f7bf4e67298))
+* implementar sistema de autenticación de usuarios ([c9ea0fe](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/c9ea0fedeb577311f44e172f64e6621adb37d339))
+* implementar sistema de autenticación de usuarios ([32c7c8e](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/32c7c8e31cfa733f08a23855926f9531e9203420))
+* implementar sistema de login básico ([a06a67f](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/a06a67f429584f54585b882b9f61ce5ac039049a))
+* implementar sistema de notificaciones push ([fcdd2d4](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/fcdd2d477a9f54b5164fedf25da9d342f15561d2))
+* implementar sistema de pagos con múltiples métodos de pago ([1996078](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/1996078692a503525fbd03c478299438f840fc4d))
+* improve auto-tag.js to handle alpha tag numbering and ensure unique tags for specific features ([dd9d3dd](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/dd9d3ddb10d3eb680d46dbbf7e6a31b347f0cf5e))
+* update versioning logic to include fixes and skins in minor version retention ([884a18c](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/884a18ce3f336fc72b65a5f8f045fa475f57fb80))
+
+
+### Bug Fixes
+
+* agregar configuración de base de datos ([48b5163](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/48b51635deb3895a31606df6ca1508d42257c042))
+* agregar validaciones adicionales de seguridad y límite de sesiones ([c4820c6](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/c4820c6cb3f0134d92e5c769b0b5f21bae7feb9a))
+* agregar validaciones de seguridad y bloqueo de cuentas ([c3eba66](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/c3eba667a62f16eb94c2d4086d3848b5f3ca3ba0))
+* agregar validaciones mejoradas para el sistema de pagos (QA hotfix) ([9870433](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/9870433b6ea0e3a5333cfab677befe5d75eec261))
+* correct typo in hotfixes section of auth.js comments ([a1f5844](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/a1f5844c233273e2f4d8b485cd5a174577798f48))
+* corregir extractBaseVersion para manejar sufijo -stable ([4157a03](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/4157a03fae1b3aa372be80ea5f07fd5a233375c9))
+* corregir extractBaseVersion para manejar timestamps ([cfe5272](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/cfe5272057891338e720f15f07f3f84dde631a7f))
+* corregir lógica de hasTagForCurrentBranch para features ([08d23e5](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/08d23e5081a765d11c70abcee7f3f06bccf1a97a))
+* corregir mensajes en el hook post-merge para consistencia y claridad ([193cb2d](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/193cb2dbce68649c8181a4d1fa73bd64c7ec2dbc))
+* corregir regex de email ([f50d1cd](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/f50d1cda5a329f2f3104b0b52fbe021146fbc8d9))
+* mejorar diseño responsive para dispositivos móviles ([6231d2c](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/6231d2cc6fe057d2c653f336995c231ec500200a))
+* mejorar validaciones de autenticación para QA ([94ab995](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/94ab995bd9fb7ea8f568d5d04c853627ff882a0f))
+* update comment for clarity on latest tag version retrieval in auto-tag.js ([56f8316](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/56f83164587b29fbd1bf9064407cf4a917e01354))
+* update header title in cashier-ui.html to reflect new version ([7bdef40](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/7bdef40c174ad75a6358e7db10545b7bb1c30d0e))
+* update hotfix tag verification logic to allow multiple tags per commit and improve tag association checks ([a0351c8](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/a0351c8bcf157b58734a188d98957bd50003b20e))
+* update hotfix tag verification logic to allow only one tag per branch and improve version tag checks ([54c65f6](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/54c65f6e2725bb16e9365e61197da20a64ea1991))
+* update versioning logic for development branch to increment minor version after merging features ([a24406f](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/a24406f0482bd57c0825a6bf472003454254018b))
+
 ﻿## [v1.3.0] - 2025-08-19
 
 ### Cambios
