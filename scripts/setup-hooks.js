@@ -68,30 +68,11 @@ elif [[ "$CURRENT_BRANCH" == hotfix/* ]]; then
 fi
 `;
 
-        // Post-commit hook for immediate tagging
-        const postCommitContent = `#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-echo "💾 Post-commit hook triggered"
-echo "📍 Current branch: $(git branch --show-current)"
-
-# Only run for specific branch types
-CURRENT_BRANCH=$(git branch --show-current)
-
-if [[ "$CURRENT_BRANCH" == release/* ]]; then
-    echo "🔄 Release branch commit - running release automation"
-    yarn gitflow:release
-elif [[ "$CURRENT_BRANCH" == hotfix/* ]]; then
-    echo "🔄 Hotfix branch commit - running hotfix automation"
-    yarn gitflow:hotfix
-fi
-`;
-
         this.createHook('post-merge', postMergeContent);
         this.createHook('pre-push', prePushContent);
-        this.createHook('post-commit', postCommitContent);
 
         console.log('✅ All Husky hooks created successfully!');
+        console.log('ℹ️  Removed post-commit hook to prevent infinite loops');
     }
 }
 

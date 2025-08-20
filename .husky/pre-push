@@ -7,7 +7,7 @@ echo "📍 Current branch: $(git branch --show-current)"
 # Run GitFlow automation based on branch type
 CURRENT_BRANCH=$(git branch --show-current)
 
-if [[ "$CURRENT_BRANCH" == feature/* ]] || [[ "$CURRENT_BRANCH" == fix/* ]] || [[ "$CURRENT_BRANCH" == update/* ]]; then
+if [[ "$CURRENT_BRANCH" == add/* ]] || [[ "$CURRENT_BRANCH" == fix/* ]] || [[ "$CURRENT_BRANCH" == update/* ]]; then
     echo "🔄 Feature branch - running feature automation"
     yarn gitflow:feature
 elif [[ "$CURRENT_BRANCH" == release/* ]]; then
