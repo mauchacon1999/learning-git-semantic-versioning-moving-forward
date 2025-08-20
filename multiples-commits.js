@@ -5,6 +5,7 @@ class DashboardService {
         this.layout = 'grid';
         this.theme = 'light'; // Segundo commit - agregar tema
         this.maxWidgets = 10; // Tercer commit - FIX: agregar límite de widgets
+        this.refreshInterval = 30000; // Cuarto commit - agregar intervalo de refresh
     }
 
     addWidget(widget) {
@@ -12,7 +13,7 @@ class DashboardService {
         if (this.widgets.length >= this.maxWidgets) {
             throw new Error('Se ha alcanzado el límite máximo de widgets');
         }
-
+        
         // Tercer commit - FIX: validar que widget no esté vacío
         if (!widget || typeof widget !== 'object') {
             throw new Error('Widget debe ser un objeto válido');
@@ -45,6 +46,29 @@ class DashboardService {
     // Tercer commit - FIX: agregar método para limpiar widgets
     clearWidgets() {
         this.widgets = [];
+    }
+
+    // Cuarto commit - agregar métodos de refresh
+    setRefreshInterval(interval) {
+        this.refreshInterval = interval;
+        return this.refreshInterval;
+    }
+
+    getRefreshInterval() {
+        return this.refreshInterval;
+    }
+
+    // Cuarto commit - agregar método de auto-refresh
+    startAutoRefresh() {
+        setInterval(() => {
+            this.refreshWidgets();
+        }, this.refreshInterval);
+    }
+
+    refreshWidgets() {
+        // Simular refresh de widgets
+        console.log('Refrescando widgets...');
+        return this.widgets;
     }
 }
 
