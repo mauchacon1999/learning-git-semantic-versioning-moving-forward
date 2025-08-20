@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/compare/v1.0.1...v1.0.2) (2025-08-20)
+
+
+### Bug Fixes
+
+* add validation and memory leak prevention to notification service ([83a5a4b](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/commit/83a5a4b92acd20b4525707d4b1bc31a9b5c292ff))
+
 ## [1.0.1](https://github.com/mauchacon1999/learning-git-semantic-versioning-moving-forward/compare/v1.0.0...v1.0.1) (2025-08-20)
 
 
