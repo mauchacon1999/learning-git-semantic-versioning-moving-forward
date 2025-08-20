@@ -1,21 +1,9 @@
 {
-  "version": "1.1.0",
+  "version": "1.0.0",
   "devDependencies": {
-    "husky": "^9.1.7",
-    "standard-version": "^9.5.0"
+    "husky": "^9.1.7"
   },
   "scripts": {
-    "prepare": "husky",
-    "check-tags": "node scripts/check-tags.js",
-    "release": "npm run check-tags && standard-version",
-    "release:first": "standard-version --first-release",
-    "release:minor": "npm run check-tags && standard-version --release-as minor",
-    "release:major": "npm run check-tags && standard-version --release-as major",
-    "release:patch": "npm run check-tags && standard-version --release-as patch",
-    "release:alpha": "npm run check-tags && standard-version --prerelease alpha",
-    "release:beta": "npm run check-tags && standard-version --prerelease beta",
-    "release:rc": "npm run check-tags && standard-version --prerelease rc",
-    "release:force": "standard-version",
-    "cleanup:tags": "node scripts/cleanup-tags.js"
+    "prepare": "husky"
   }
 }
